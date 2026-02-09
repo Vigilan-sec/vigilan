@@ -11,11 +11,13 @@ import type { AlertStats, FlowStats } from "@/lib/types";
 
 export default function DashboardPage() {
   const { alerts, status } = useWebSocket();
-  const { data: alertStats } = useSWR<AlertStats>("alert-stats", () => fetchAlertStats(), {
+  const { data: alertStats } = useSWR<AlertStats>("alert-stats", () => fetchAlertStats() as Promise<AlertStats>, {
     refreshInterval: 10000,
+    fallbackData: undefined,
   });
-  const { data: flowStats } = useSWR<FlowStats>("flow-stats", () => fetchFlowStats(), {
+  const { data: flowStats } = useSWR<FlowStats>("flow-stats", () => fetchFlowStats() as Promise<FlowStats>, {
     refreshInterval: 10000,
+    fallbackData: undefined,
   });
 
   return (
