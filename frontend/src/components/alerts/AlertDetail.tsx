@@ -1,0 +1,129 @@
+import type { AlertRecord } from "@/lib/types";
+import {
+  formatFullDate,
+  formatTimestamp,
+  protocolColor,
+} from "@/lib/utils";
+import SeverityBadge from "@/components/alerts/SeverityBadge";
+
+interface AlertDetailProps {
+  alert: AlertRecord;
+}
+
+interface FieldDef {
+  label: string;
+  value: string | number | null | undefined;
+  mono?: boolean;
+  render?: () => React.ReactNode;
+}
+
+export default function AlertDetail({ alert }: AlertDetailProps) {
+  const fields: FieldDef[] = [
+    { label: "Alert ID", value: alert.id, mono: true },
+    { label: "Timestamp", value: formatFullDate(alert.timestamp), mono: true },
+    {
+      label: "Severity",
+      value: null,
+      render: () => <SeverityBadge severity={alert.severity} />,
+    },
+    { label: "Signature", value: alert.signature },
+    { label: "Signature ID", value: alert.signature_id, mono: true },
+    { label: "Category", value: alert.category },
+    { label: "Action", value: alert.action },
+    { label: "Source IP", value: alert.src_ip, mono: true },
+    {
+      label: "Source Port",
+      value: alert.src_port != null ? String(alert.src_port) : "--",
+      mono: true,
+    },
+    { label: "Destination IP", value: alert.dest_ip, mono: true },
+    {
+      label: "Destination Port",
+      value: alert.dest_port != null ? String(alert.dest_port) : "--",
+      mono: true,
+    },
+    {
+      label: "Protocol",
+      value: null,
+      render: () => (
+        <span
+          className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${protocolColor(alert.proto)}`}
+        >
+          {alert.proto ?? "--"}
+        </span>
+      ),
+    },
+    { label: "App Protocol", value: alert.app_proto ?? "--" },
+    { label: "Flow ID", value: alert.flow_id != null ? String(alert.flow_id) : "--", mono: true },
+    { label: "Community ID", value: alert.community_id ?? "--", mono: true },
+    { label: "Interface", value: alert.in_iface ?? "--" },
+    { label: "GID", value: alert.gid, mono: true },
+    { label: "Rev", value: alert.rev, mono: true },
+    {
+      label: "Ingested At",
+      value: formatFullDate(alert.ingested_at),
+      mono: true,
+    },
+  ];
+
+  let parsedMetadata: string | null = null;
+  if (alert.metadata_json) {
+    try {
+      parsedMetadata = JSON.stringify(JSON.parse(alert.metadata_json), null, 2);
+    } catch {
+      parsedMetadata = alert.metadata_json;
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Detail Fields */}
+      <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 overflow-hidden">
+        <div className="border-b border-zinc-700/50 px-5 py-3">
+          <h2 className="text-sm font-semibold text-zinc-100">Alert Details</h2>
+        </div>
+        <dl className="divide-y divide-zinc-700/30">
+          {fields.map((field) => (
+            <div
+              key={field.label}
+              className="flex items-baseline px-5 py-3 gap-4"
+            >
+              <dt className="w-40 shrink-0 text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                {field.label}
+              </dt>
+              <dd
+                className={`text-sm text-zinc-200 ${
+                  field.mono ? "font-mono" : ""
+                }`}
+              >
+                {field.render ? field.render() : (field.value ?? "--")}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      {/* Metadata JSON */}
+      {parsedMetadata && (
+        <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 overflow-hidden">
+          <div className="border-b border-zinc-700/50 px-5 py-3">
+            <h2 className="text-sm font-semibold text-zinc-100">Metadata</h2>
+          </div>
+          <pre className="overflow-x-auto p-5 text-xs font-mono text-zinc-300 leading-relaxed">
+            {parsedMetadata}
+          </pre>
+        </div>
+      )}
+
+      {/* Raw JSON */}
+      <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 overflow-hidden">
+        <div className="border-b border-zinc-700/50 px-5 py-3">
+          <h2 className="text-sm font-semibold text-zinc-100">Raw Record</h2>
+        </div>
+        <pre className="overflow-x-auto p-5 text-xs font-mono text-zinc-400 leading-relaxed">
+          {JSON.stringify(alert, null, 2)}
+        </pre>
+      </div>
+    </div>
+  );
+}
