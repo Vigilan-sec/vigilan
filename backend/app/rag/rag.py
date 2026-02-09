@@ -1,3 +1,4 @@
+import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
 from langchain_chroma import Chroma
@@ -44,7 +45,8 @@ Answer:
     prompt = ChatPromptTemplate.from_template(prompt_text)
     formatted_prompt = prompt.format(content_text=content_text, query=query)
 
-    llm = OllamaLLM(model="mistral:latest")
+    ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    llm = OllamaLLM(model="mistral:latest", base_url=ollama_host)
     try:
         response = llm.invoke(formatted_prompt)
     except Exception as e:
@@ -55,6 +57,67 @@ Answer:
         low = response.strip().lower()
         if low in ("i don't know", "i do not know", "cannot answer", "i'm not sure"):
             return "I don't know"
+    return response
+
+
+def generate_alert_explanation(alert_data: dict, relevant_docs: list) -> str:
+    """
+    Generate an explanation and mitigation advice for a security alert.
+    Args:
+        alert_data (dict): The alert data (signature, category, severity, etc.)
+        relevant_docs (list): A list of relevant documents from vector search.
+    Returns:
+        response (str): The generated explanation and recommendations.
+    """
+    # Merge document contents for the prompt
+    content_text = (
+        "\n\n---\n\n".join(doc.page_content for doc, _ in relevant_docs)
+        if relevant_docs
+        else "No relevant document"
+    )
+
+    signature = alert_data.get("signature", "Unknown alert")
+    category = alert_data.get("category", "Unknown category")
+    severity = alert_data.get("severity", "Unknown")
+
+    prompt_text = """
+You are a cybersecurity expert assistant. A security alert has been triggered and you need to explain it and provide protection recommendations.
+
+ALERT DETAILS:
+- Signature: {signature}
+- Category: {category}
+- Severity: {severity}
+
+CONTEXT FROM SECURITY DOCUMENTATION:
+{content_text}
+
+Based on the alert details and the provided security documentation, please:
+1) Explain what this alert means and what attack or suspicious activity it detected
+2) Assess the potential risk and impact
+3) Provide specific recommendations on how to protect against or mitigate this threat
+4) Suggest any additional security measures that should be taken
+
+If the provided documentation doesn't contain relevant information, use your cybersecurity knowledge to provide a helpful explanation.
+
+Response:
+"""
+
+    prompt = ChatPromptTemplate.from_template(prompt_text)
+    formatted_prompt = prompt.format(
+        signature=signature,
+        category=category,
+        severity=severity,
+        content_text=content_text,
+    )
+
+    ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    llm = OllamaLLM(model="mistral:latest", base_url=ollama_host)
+    try:
+        response = llm.invoke(formatted_prompt)
+    except Exception as e:
+        logger.error(f"LLM generation failed: {e}")
+        response = "Error generating alert explanation."
+
     return response
 
 

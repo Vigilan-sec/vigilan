@@ -70,7 +70,7 @@ def add_documents_to_vector_store(
         embeddings: Embedding model instance.
         persist_dir (str): Directory to persist the vector store.
     """
-    from src.core.vector_store import create_vector_store
+    from app.rag.vector_store import create_vector_store
 
     if not documents:
         logger.warning("No documents to add to the vector store.")

@@ -22,8 +22,8 @@ def main():
     parser.add_argument(
         "--threshold",
         type=float,
-        default=0.6,
-        help="Minimum similarity score to accept a chunk",
+        default=1.0,
+        help="Maximum distance score to accept a chunk (lower = more similar)",
     )
     parser.add_argument(
         "--persist-dir",

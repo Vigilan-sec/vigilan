@@ -82,10 +82,42 @@ def create_vector_store(
 
 
 def load_vector_store(embeddings: OllamaEmbeddings, persist_dir="chroma") -> Chroma:
-    return Chroma(
-        persist_directory=persist_dir,
-        embedding_function=embeddings,
-    )
+    """Load an existing Chroma vector store.
+
+    Args:
+        embeddings: The embedding model to use.
+        persist_dir: Directory where the vector store is persisted.
+
+    Returns:
+        Chroma: The loaded vector store.
+    """
+    try:
+        # Try using the simpler constructor that may bypass tenant issues
+        return Chroma(
+            persist_directory=persist_dir,
+            embedding_function=embeddings,
+        )
+    except Exception as e:
+        logger.error(f"Failed to load vector store with persist_directory: {e}")
+        logger.info("Trying alternative loading method...")
+
+        # Try alternative method with explicit client settings
+        import chromadb
+        from chromadb.config import Settings
+
+        client_settings = Settings(
+            anonymized_telemetry=False,
+            allow_reset=True,
+            is_persistent=True,
+            persist_directory=persist_dir,
+        )
+
+        client = chromadb.Client(client_settings)
+
+        return Chroma(
+            client=client,
+            embedding_function=embeddings,
+        )
 
 
 def search_vector_store(db: Chroma, query: str, k=6, threshold=1.0) -> list:

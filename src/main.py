@@ -54,7 +54,7 @@ def main():
             db = load_vector_store(embedding_model, persist_dir)
 
         # Query the RAG system
-        query = "What is an sql injection"
+        query = "explain sql injections"
         results = search_vector_store(db, query)
         logger.info(f"Found {len(results)} relevant documents")
 
