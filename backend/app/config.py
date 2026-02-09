@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # EVE.json source
-    eve_json_path: Path = Path(__file__).resolve().parent.parent.parent / "vm" / "shared" / "eve.json"
+    eve_json_path: Path = Path(__file__).resolve().parent.parent.parent / "data" / "eve.json"
     eve_watcher_poll_interval: float = 0.5
     eve_watcher_enabled: bool = True
     eve_watcher_start_at_end: bool = False
@@ -19,9 +19,6 @@ class Settings(BaseSettings):
 
     # CORS
     cors_origins: list[str] = ["http://localhost:3000"]
-
-    # VM
-    vm_ip: str = "192.168.56.10"
 
     model_config = {"env_prefix": "VIGILAN_", "env_file": ".env"}
 

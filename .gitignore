@@ -212,11 +212,10 @@ node_modules/
 out/
 .env*.local
 
-# === Vagrant ===
-.vagrant/
-
 # === Vigilan data ===
 backend/*.db
 backend/data/
-vm/shared/eve.json
 *.sqlite3-journal
+
+# === Docker ===
+.env.docker

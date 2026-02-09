@@ -3,7 +3,7 @@
 
 vars:
   address-groups:
-    HOME_NET: "[192.168.56.0/24,10.0.2.0/24]"
+    HOME_NET: "[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]"
     EXTERNAL_NET: "!$HOME_NET"
   port-groups:
     HTTP_PORTS: "80"
@@ -40,6 +40,9 @@ af-packet:
     cluster-id: 99
     cluster-type: cluster_flow
     defrag: yes
+    use-mmap: yes
+    ring-size: 200000
+    buffer-size: 1048576
 
 default-rule-path: /etc/suricata/rules
 rule-files:

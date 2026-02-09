@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 class EveWatcher:
     """Watches the eve.json file for new lines (poll-based tail).
 
-    VirtualBox shared folders don't reliably emit filesystem events,
-    so we poll every ``poll_interval`` seconds instead of using inotify.
+    Polling is used instead of inotify for compatibility with Docker
+    shared volumes and cross-platform support.
     """
 
     def __init__(

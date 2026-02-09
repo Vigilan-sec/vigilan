@@ -3,10 +3,10 @@
 
 Usage:
     # Batch mode: write 500 events to a file
-    python generate_mock_eve.py --output ../../vm/shared/eve.json --count 500
+    python generate_mock_eve.py --output ../../data/eve.json --count 500
 
     # Streaming mode: continuously append at 2 events/sec
-    python generate_mock_eve.py --output ../../vm/shared/eve.json --count 0 --rate 2.0
+    python generate_mock_eve.py --output ../../data/eve.json --count 0 --rate 2.0
 """
 
 import argparse
