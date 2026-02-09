@@ -1,7 +1,6 @@
 import type { AlertRecord } from "@/lib/types";
 import {
   formatFullDate,
-  formatTimestamp,
   protocolColor,
 } from "@/lib/utils";
 import SeverityBadge from "@/components/alerts/SeverityBadge";

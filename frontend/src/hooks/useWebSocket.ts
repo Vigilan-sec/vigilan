@@ -15,6 +15,7 @@ export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const retriesRef = useRef(0);
   const mountedRef = useRef(true);
+  const connectRef = useRef<() => void>(() => {});
 
   const connect = useCallback(() => {
     if (!mountedRef.current) return;
@@ -49,7 +50,7 @@ export function useWebSocket() {
       setStatus("disconnected");
       const delay = RECONNECT_DELAYS[Math.min(retriesRef.current, RECONNECT_DELAYS.length - 1)];
       retriesRef.current++;
-      setTimeout(connect, delay);
+      setTimeout(() => connectRef.current(), delay);
     };
 
     ws.onerror = () => {
@@ -59,8 +60,10 @@ export function useWebSocket() {
 
   useEffect(() => {
     mountedRef.current = true;
-    connect();
+    connectRef.current = connect;
+    const connectTimeout = setTimeout(() => connectRef.current(), 0);
     return () => {
+      clearTimeout(connectTimeout);
       mountedRef.current = false;
       wsRef.current?.close();
     };
