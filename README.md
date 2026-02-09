@@ -4,7 +4,7 @@ ouais vigilan, c'est un ids machin machin
 
 # Architecture
 
-![Architecture](/architecture.png)
+![Architecture](/images/architecture.png)
 
 # File strructure
 
