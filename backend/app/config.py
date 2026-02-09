@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     eve_json_path: Path = Path(__file__).resolve().parent.parent.parent / "vm" / "shared" / "eve.json"
     eve_watcher_poll_interval: float = 0.5
     eve_watcher_enabled: bool = True
+    eve_watcher_start_at_end: bool = False
 
     # Database
     database_url: str = "sqlite+aiosqlite:///./vigilan.db"

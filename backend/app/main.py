@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI):
             eve_path=settings.eve_json_path,
             ws_manager=ws_manager,
             poll_interval=settings.eve_watcher_poll_interval,
+            start_at_end=settings.eve_watcher_start_at_end,
         )
         await watcher.start()
         app.state.watcher = watcher
@@ -56,3 +57,12 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Vigilan IDS backend is running",
+        "health": "/api/health",
+        "docs": "/docs",
+    }

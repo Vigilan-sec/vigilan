@@ -24,10 +24,12 @@ class EveWatcher:
         eve_path: Path,
         ws_manager: ConnectionManager,
         poll_interval: float = 0.5,
+        start_at_end: bool = True,
     ):
         self.eve_path = eve_path
         self.ws_manager = ws_manager
         self.poll_interval = poll_interval
+        self.start_at_end = start_at_end
         self._offset: int = 0
         self._running: bool = False
         self._task: asyncio.Task | None = None
@@ -36,8 +38,8 @@ class EveWatcher:
 
     async def start(self) -> None:
         self._running = True
-        # Seek to end on startup so we don't replay history
-        if self.eve_path.exists():
+        # Optionally seek to end on startup so we don't replay history
+        if self.eve_path.exists() and self.start_at_end:
             self._offset = self.eve_path.stat().st_size
         self._task = asyncio.create_task(self._watch_loop())
         logger.info("EveWatcher started, watching %s", self.eve_path)
