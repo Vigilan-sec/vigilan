@@ -2,6 +2,14 @@
 
 ouais vigilan, c'est un ids machin machin
 
+# Architecture
+
+![Architecture](/architecture.png)
+
+# File strructure
+
+
+
 # Installation
 
 Clone the repository
