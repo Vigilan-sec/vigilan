@@ -22,7 +22,9 @@ RUN apt-get update && \
 COPY suricata.yaml /etc/suricata/suricata.yaml
 COPY local.rules /etc/suricata/rules/local.rules
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+
+# Fix Windows line endings and make executable
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 # Log directory (volume mount point)
 RUN mkdir -p /var/log/suricata
