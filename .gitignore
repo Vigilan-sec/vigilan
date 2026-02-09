@@ -14,7 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+.venv/lib/
 lib64/
 parts/
 sdist/
@@ -212,3 +212,17 @@ storage/
 # uploaded files in the data folder
 data/*
 !data/
+
+# === Node.js ===
+node_modules/
+.next/
+out/
+.env*.local
+
+# === Vigilan data ===
+backend/*.db
+backend/data/
+*.sqlite3-journal
+
+# === Docker ===
+.env.docker
