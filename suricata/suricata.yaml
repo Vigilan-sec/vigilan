@@ -35,14 +35,11 @@ outputs:
             threads: no
             deltas: no
 
-af-packet:
+# Use pcap on Docker Desktop; AF_PACKET is not supported reliably.
+pcap:
   - interface: eth0
-    cluster-id: 99
-    cluster-type: cluster_flow
-    defrag: yes
-    use-mmap: yes
-    ring-size: 200000
-    buffer-size: 1048576
+    buffer-size: 67108864
+    checksum-checks: auto
 
 default-rule-path: /etc/suricata/rules
 rule-files:

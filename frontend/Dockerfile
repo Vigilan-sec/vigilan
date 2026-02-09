@@ -10,6 +10,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Ensure optional public dir exists for copy in runner stage.
+RUN mkdir -p /app/public
+
 # Build-time env vars (baked into the JS bundle for client-side use)
 ARG NEXT_PUBLIC_WS_URL=ws://localhost:8000/api/ws/alerts
 ENV NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
@@ -26,7 +29,7 @@ ENV NODE_ENV=production
 # Copy standalone build output
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public 2>/dev/null || true
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 

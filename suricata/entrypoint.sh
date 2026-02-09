@@ -28,5 +28,5 @@ if [ "$GATEWAY" = "true" ]; then
     echo "Gateway NAT rules applied."
 fi
 
-echo "Starting Suricata on ${IFACE}..."
-exec suricata -c /etc/suricata/suricata.yaml --af-packet="${IFACE}" -v
+echo "Starting Suricata on ${IFACE} (pcap mode)..."
+exec suricata -c /etc/suricata/suricata.yaml -i "${IFACE}" -v
