@@ -77,21 +77,21 @@ export default function AlertDetail({ alert }: AlertDetailProps) {
   return (
     <div className="space-y-6">
       {/* Detail Fields */}
-      <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 overflow-hidden">
-        <div className="border-b border-zinc-700/50 px-5 py-3">
-          <h2 className="text-sm font-semibold text-zinc-100">Alert Details</h2>
+      <div className="rounded-lg border border-app surface-2 overflow-hidden">
+        <div className="border-b border-app px-5 py-3">
+          <h2 className="text-sm font-semibold text-strong">Alert Details</h2>
         </div>
-        <dl className="divide-y divide-zinc-700/30">
+        <dl className="divide-y divide-[color:var(--border)]">
           {fields.map((field) => (
             <div
               key={field.label}
               className="flex items-baseline px-5 py-3 gap-4"
             >
-              <dt className="w-40 shrink-0 text-xs font-medium text-zinc-400 uppercase tracking-wider">
+              <dt className="w-40 shrink-0 text-xs font-medium text-muted uppercase tracking-wider">
                 {field.label}
               </dt>
               <dd
-                className={`text-sm text-zinc-200 ${
+                className={`text-sm text-muted ${
                   field.mono ? "font-mono" : ""
                 }`}
               >
@@ -104,22 +104,22 @@ export default function AlertDetail({ alert }: AlertDetailProps) {
 
       {/* Metadata JSON */}
       {parsedMetadata && (
-        <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 overflow-hidden">
-          <div className="border-b border-zinc-700/50 px-5 py-3">
-            <h2 className="text-sm font-semibold text-zinc-100">Metadata</h2>
+        <div className="rounded-lg border border-app surface-2 overflow-hidden">
+          <div className="border-b border-app px-5 py-3">
+            <h2 className="text-sm font-semibold text-strong">Metadata</h2>
           </div>
-          <pre className="overflow-x-auto p-5 text-xs font-mono text-zinc-300 leading-relaxed">
+          <pre className="overflow-x-auto p-5 text-xs font-mono text-muted leading-relaxed">
             {parsedMetadata}
           </pre>
         </div>
       )}
 
       {/* Raw JSON */}
-      <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 overflow-hidden">
-        <div className="border-b border-zinc-700/50 px-5 py-3">
-          <h2 className="text-sm font-semibold text-zinc-100">Raw Record</h2>
+      <div className="rounded-lg border border-app surface-2 overflow-hidden">
+        <div className="border-b border-app px-5 py-3">
+          <h2 className="text-sm font-semibold text-strong">Raw Record</h2>
         </div>
-        <pre className="overflow-x-auto p-5 text-xs font-mono text-zinc-400 leading-relaxed">
+        <pre className="overflow-x-auto p-5 text-xs font-mono text-subtle leading-relaxed">
           {JSON.stringify(alert, null, 2)}
         </pre>
       </div>

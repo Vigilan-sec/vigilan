@@ -28,7 +28,7 @@ export default function LiveIndicator({ status }: LiveIndicatorProps) {
   const config = statusConfig[status];
 
   return (
-    <span className="inline-flex items-center gap-2 text-xs font-medium text-zinc-400">
+    <span className="inline-flex items-center gap-2 text-xs font-medium text-muted">
       <span className="relative flex h-2.5 w-2.5">
         {config.pulse && (
           <span

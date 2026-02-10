@@ -41,7 +41,7 @@ export function protocolColor(proto: string | null | undefined): string {
     dns: "bg-cyan-500/20 text-cyan-400",
     tls: "bg-purple-500/20 text-purple-400",
   };
-  return colors[normalized] ?? "bg-zinc-500/20 text-zinc-300";
+  return colors[normalized] ?? "chip-muted";
 }
 
 type SeverityMeta = {

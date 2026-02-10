@@ -28,9 +28,9 @@ export default function FlowsTable() {
           Failed to load flows: {error.message}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-zinc-700/50">
+        <div className="overflow-x-auto rounded-lg border border-app">
           <table className="w-full text-sm text-left">
-            <thead className="sticky top-0 z-10 bg-zinc-800 text-xs uppercase text-zinc-400 border-b border-zinc-700/50">
+            <thead className="sticky top-0 z-10 surface-2 text-xs uppercase text-muted border-b border-app">
               <tr>
                 <th className="px-4 py-3 font-medium">Time</th>
                 <th className="px-4 py-3 font-medium">Proto</th>
@@ -52,12 +52,12 @@ export default function FlowsTable() {
                 <th className="px-4 py-3 font-medium">State</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-700/30">
+            <tbody className="divide-y divide-[color:var(--border)]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-zinc-500">
+                  <td colSpan={10} className="px-4 py-8 text-center text-subtle">
                     <span className="inline-flex items-center gap-2">
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-300" />
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--border)] border-t-[color:var(--text-strong)]" />
                       Loading...
                     </span>
                   </td>
@@ -66,9 +66,9 @@ export default function FlowsTable() {
                 data.items.map((flow) => (
                   <tr
                     key={flow.id}
-                    className="bg-zinc-900/50 hover:bg-zinc-700/40 transition-colors"
+                    className="surface-1 hover-surface-3 transition-colors"
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-300 whitespace-nowrap">
+                    <td className="px-4 py-3 font-mono text-xs text-muted whitespace-nowrap">
                       {formatTimestamp(flow.timestamp)}
                     </td>
                     <td className="px-4 py-3">
@@ -78,27 +78,27 @@ export default function FlowsTable() {
                         {flow.proto ?? "--"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-400 whitespace-nowrap">
+                    <td className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap">
                       {flow.src_ip}
                       {flow.src_port != null ? `:${flow.src_port}` : ""}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-400 whitespace-nowrap">
+                    <td className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap">
                       {flow.dest_ip}
                       {flow.dest_port != null ? `:${flow.dest_port}` : ""}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-300 text-right whitespace-nowrap">
+                    <td className="px-4 py-3 font-mono text-xs text-muted text-right whitespace-nowrap">
                       {formatBytes(flow.bytes_toserver)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-300 text-right whitespace-nowrap">
+                    <td className="px-4 py-3 font-mono text-xs text-muted text-right whitespace-nowrap">
                       {formatBytes(flow.bytes_toclient)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-400 text-right">
+                    <td className="px-4 py-3 font-mono text-xs text-subtle text-right">
                       {formatNumber(flow.pkts_toserver)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-400 text-right">
+                    <td className="px-4 py-3 font-mono text-xs text-subtle text-right">
                       {formatNumber(flow.pkts_toclient)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-400 text-right whitespace-nowrap">
+                    <td className="px-4 py-3 font-mono text-xs text-subtle text-right whitespace-nowrap">
                       {flow.age != null ? `${flow.age}s` : "--"}
                     </td>
                     <td className="px-4 py-3">
@@ -110,7 +110,7 @@ export default function FlowsTable() {
                 <tr>
                   <td
                     colSpan={10}
-                    className="px-4 py-8 text-center text-zinc-500"
+                    className="px-4 py-8 text-center text-subtle"
                   >
                     No flows found
                   </td>
@@ -123,21 +123,21 @@ export default function FlowsTable() {
 
       {/* Pagination */}
       {data && data.pages > 1 && (
-        <div className="flex items-center justify-between rounded-lg border border-zinc-700/50 bg-zinc-800/50 px-4 py-3">
-          <p className="text-xs text-zinc-400">
+        <div className="flex items-center justify-between rounded-lg border border-app surface-2 px-4 py-3">
+          <p className="text-xs text-muted">
             Showing page {data.page} of {data.pages} ({data.total} total flows)
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="rounded-md border border-zinc-600 bg-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
             {generatePageNumbers(data.page, data.pages).map((p, i) =>
               p === null ? (
-                <span key={`ellipsis-${i}`} className="text-zinc-500 px-1">
+                <span key={`ellipsis-${i}`} className="text-subtle px-1">
                   ...
                 </span>
               ) : (
@@ -146,8 +146,8 @@ export default function FlowsTable() {
                   onClick={() => setPage(p)}
                   className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                     p === page
-                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                      : "border border-zinc-600 bg-zinc-700 text-zinc-300 hover:bg-zinc-600"
+                      ? "accent-chip border"
+                      : "border input-base hover-surface-3"
                   }`}
                 >
                   {p}
@@ -157,7 +157,7 @@ export default function FlowsTable() {
             <button
               onClick={() => setPage((p) => Math.min(data.pages, p + 1))}
               disabled={page >= data.pages}
-              className="rounded-md border border-zinc-600 bg-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>
@@ -169,15 +169,15 @@ export default function FlowsTable() {
 }
 
 function FlowStateBadge({ state }: { state: string | null }) {
-  if (!state) return <span className="text-xs text-zinc-500">--</span>;
+  if (!state) return <span className="text-xs text-subtle">--</span>;
 
   const colorMap: Record<string, string> = {
     new: "bg-green-500/20 text-green-400",
     established: "bg-blue-500/20 text-blue-400",
-    closed: "bg-zinc-500/20 text-zinc-400",
+    closed: "chip-muted",
   };
 
-  const color = colorMap[state.toLowerCase()] ?? "bg-zinc-500/20 text-zinc-300";
+  const color = colorMap[state.toLowerCase()] ?? "chip-muted";
 
   return (
     <span

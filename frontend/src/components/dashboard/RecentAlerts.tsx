@@ -13,19 +13,19 @@ export default function RecentAlerts({ alerts }: RecentAlertsProps) {
   const recent = alerts.slice(0, 10);
 
   return (
-    <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50">
-      <div className="flex items-center justify-between border-b border-zinc-700/50 px-5 py-3">
-        <h2 className="text-sm font-semibold text-zinc-100">Recent Alerts</h2>
+    <div className="rounded-lg border border-app surface-2">
+      <div className="flex items-center justify-between border-b border-app px-5 py-3">
+        <h2 className="text-sm font-semibold text-strong">Recent Alerts</h2>
         <Link
           href="/alerts"
-          className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+          className="text-xs text-muted hover:text-strong transition-colors"
         >
           View all &rarr;
         </Link>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-zinc-800 text-xs uppercase text-zinc-400">
+          <thead className="surface-3 text-xs uppercase text-muted">
             <tr>
               <th className="px-4 py-2.5 text-left font-medium">Time</th>
               <th className="px-4 py-2.5 text-left font-medium">Severity</th>
@@ -33,12 +33,12 @@ export default function RecentAlerts({ alerts }: RecentAlertsProps) {
               <th className="px-4 py-2.5 text-left font-medium">Source &rarr; Dest</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-700/30">
+          <tbody className="divide-y divide-[color:var(--border)]">
             {recent.length === 0 ? (
               <tr>
                 <td
                   colSpan={4}
-                  className="px-4 py-6 text-center text-zinc-500 text-sm"
+                  className="px-4 py-6 text-center text-subtle text-sm"
                 >
                   No alerts yet
                 </td>
@@ -47,12 +47,12 @@ export default function RecentAlerts({ alerts }: RecentAlertsProps) {
               recent.map((alert) => (
                 <tr
                   key={alert.id}
-                  className="hover:bg-zinc-700/40 transition-colors"
+                  className="hover-surface-3 transition-colors"
                 >
                   <td className="px-4 py-2.5">
                     <Link
                       href={`/alerts/${alert.id}`}
-                      className="font-mono text-xs text-zinc-300 hover:text-zinc-100"
+                      className="font-mono text-xs text-muted hover:text-strong"
                     >
                       {formatTimestamp(alert.timestamp)}
                     </Link>
@@ -63,13 +63,13 @@ export default function RecentAlerts({ alerts }: RecentAlertsProps) {
                   <td className="px-4 py-2.5">
                     <Link
                       href={`/alerts/${alert.id}`}
-                      className="text-zinc-300 hover:text-zinc-100 max-w-xs truncate block"
+                      className="text-muted hover:text-strong max-w-xs truncate block"
                     >
                       {alert.signature}
                     </Link>
                   </td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-zinc-400">
-                    <Link href={`/alerts/${alert.id}`} className="hover:text-zinc-200">
+                  <td className="px-4 py-2.5 font-mono text-xs text-subtle">
+                    <Link href={`/alerts/${alert.id}`} className="hover:text-strong">
                       {alert.src_ip}
                       {alert.src_port != null ? `:${alert.src_port}` : ""}
                       {" \u2192 "}

@@ -20,17 +20,17 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-56 flex-col bg-zinc-900 border-r border-zinc-800">
+    <aside className="fixed left-0 top-0 z-40 flex h-screen w-56 flex-col surface-2 border-r border-app">
       {/* Logo */}
-      <div className="flex items-center gap-2 px-5 py-5 border-b border-zinc-800">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-green-500/20 text-green-400 font-bold text-sm">
+      <div className="flex items-center gap-2 px-5 py-5 border-b border-app">
+        <div className="flex h-8 w-8 items-center justify-center rounded-md accent-chip border font-bold text-sm">
           V
         </div>
         <div>
-          <h1 className="text-sm font-bold text-zinc-100 tracking-wide">
+          <h1 className="text-sm font-bold text-strong tracking-wide">
             Vigilan IDS
           </h1>
-          <p className="text-[10px] text-zinc-500 font-medium">
+          <p className="text-[10px] text-subtle font-medium">
             Intrusion Detection
           </p>
         </div>
@@ -46,8 +46,8 @@ export default function Sidebar() {
               href={item.href}
               className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
                 active
-                  ? "bg-zinc-800 text-zinc-100"
-                  : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200"
+                    ? "surface-3 text-strong"
+                    : "text-muted hover-surface-3 hover:text-strong"
               }`}
             >
               <span className="text-base leading-none w-5 text-center">
@@ -55,7 +55,7 @@ export default function Sidebar() {
               </span>
               {item.label}
               {active && (
-                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-green-500" />
+                <span className="ml-auto h-1.5 w-1.5 rounded-full accent-dot" />
               )}
             </Link>
           );
@@ -63,8 +63,8 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-zinc-800 px-5 py-3">
-        <p className="text-[10px] text-zinc-600 font-mono">v0.1.0</p>
+      <div className="border-t border-app px-5 py-3">
+        <p className="text-[10px] text-subtle font-mono">v0.1.0</p>
       </div>
     </aside>
   );

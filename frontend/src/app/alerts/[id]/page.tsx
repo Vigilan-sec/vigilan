@@ -25,14 +25,14 @@ export default function AlertDetailPage() {
       <div className="p-6">
         <Link
           href="/alerts"
-          className="inline-flex items-center gap-1 text-sm text-zinc-400 hover:text-zinc-200 mb-4"
+          className="inline-flex items-center gap-1 text-sm text-muted hover:text-strong mb-4"
         >
           &larr; Back to Alerts
         </Link>
 
         {isLoading && (
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[color:var(--accent)]" />
           </div>
         )}
 

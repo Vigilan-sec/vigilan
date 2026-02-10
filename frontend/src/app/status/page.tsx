@@ -20,10 +20,10 @@ export default function StatusPage() {
       <Header title="System Status" wsStatus={wsStatus} />
       <div className="p-6 space-y-6">
         {/* Backend Health */}
-        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-6">
+        <div className="surface-2 border border-app rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Backend</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-zinc-400">Status</div>
+            <div className="text-muted">Status</div>
             <div>
               {health ? (
                 <span className="text-green-400">Online</span>
@@ -31,16 +31,16 @@ export default function StatusPage() {
                 <span className="text-red-400">Offline</span>
               )}
             </div>
-            <div className="text-zinc-400">Version</div>
+            <div className="text-muted">Version</div>
             <div className="font-mono">{health?.version || "--"}</div>
           </div>
         </div>
 
         {/* Watcher Status */}
-        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-6">
+        <div className="surface-2 border border-app rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">EVE Watcher</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-zinc-400">Running</div>
+            <div className="text-muted">Running</div>
             <div>
               {sysStatus?.watcher.running ? (
                 <span className="text-green-400">Yes</span>
@@ -48,15 +48,15 @@ export default function StatusPage() {
                 <span className="text-red-400">No</span>
               )}
             </div>
-            <div className="text-zinc-400">EVE Path</div>
+            <div className="text-muted">EVE Path</div>
             <div className="font-mono text-xs">
               {sysStatus?.watcher.eve_path || "--"}
             </div>
-            <div className="text-zinc-400">Lines Processed</div>
+            <div className="text-muted">Lines Processed</div>
             <div className="font-mono">
               {sysStatus?.watcher.lines_processed?.toLocaleString() || "0"}
             </div>
-            <div className="text-zinc-400">Last Event</div>
+            <div className="text-muted">Last Event</div>
             <div className="font-mono text-xs">
               {sysStatus?.watcher.last_event_at || "--"}
             </div>
@@ -64,10 +64,10 @@ export default function StatusPage() {
         </div>
 
         {/* WebSocket */}
-        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-6">
+        <div className="surface-2 border border-app rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">WebSocket</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-zinc-400">Connection</div>
+            <div className="text-muted">Connection</div>
             <div>
               {wsStatus === "connected" && (
                 <span className="text-green-400">Connected</span>
@@ -83,10 +83,10 @@ export default function StatusPage() {
         </div>
 
         {/* Database */}
-        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-6">
+        <div className="surface-2 border border-app rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Database</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-zinc-400">Status</div>
+            <div className="text-muted">Status</div>
             <div>
               <span className="text-green-400">
                 {sysStatus?.database.status || "--"}

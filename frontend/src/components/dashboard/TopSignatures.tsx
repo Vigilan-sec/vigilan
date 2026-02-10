@@ -7,11 +7,11 @@ interface TopSignaturesProps {
 export default function TopSignatures({ topSignatures }: TopSignaturesProps) {
   if (!topSignatures || topSignatures.length === 0) {
     return (
-      <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 p-5">
-        <h2 className="text-sm font-semibold text-zinc-100 mb-4">
+      <div className="rounded-lg border border-app surface-2 p-5">
+        <h2 className="text-sm font-semibold text-strong mb-4">
           Top Signatures
         </h2>
-        <p className="text-sm text-zinc-500">No signature data available</p>
+        <p className="text-sm text-subtle">No signature data available</p>
       </div>
     );
   }
@@ -19,8 +19,8 @@ export default function TopSignatures({ topSignatures }: TopSignaturesProps) {
   const maxCount = Math.max(...topSignatures.map((s) => s.count));
 
   return (
-    <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 p-5">
-      <h2 className="text-sm font-semibold text-zinc-100 mb-4">
+    <div className="rounded-lg border border-app surface-2 p-5">
+      <h2 className="text-sm font-semibold text-strong mb-4">
         Top Signatures
       </h2>
       <div className="space-y-3">
@@ -30,16 +30,16 @@ export default function TopSignatures({ topSignatures }: TopSignaturesProps) {
             <div key={sig.sid}>
               <div className="flex items-center justify-between mb-1">
                 <span
-                  className="text-xs text-zinc-300 truncate max-w-[70%]"
+                  className="text-xs text-muted truncate max-w-[70%]"
                   title={sig.signature}
                 >
                   {sig.signature}
                 </span>
-                <span className="text-xs font-mono text-zinc-400 ml-2 shrink-0">
+                <span className="text-xs font-mono text-subtle ml-2 shrink-0">
                   {formatNumber(sig.count)}
                 </span>
               </div>
-              <div className="h-2 w-full rounded-full bg-zinc-700/50 overflow-hidden">
+              <div className="h-2 w-full rounded-full surface-3 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-red-500/80 to-orange-500/80 transition-all duration-500"
                   style={{ width: `${widthPercent}%` }}
