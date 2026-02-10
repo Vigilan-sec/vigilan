@@ -39,6 +39,72 @@ docker compose logs -f
 docker compose down
 ```
 
+## Configuration LLM/RAG (optionnel)
+
+Le système inclut une fonctionnalité RAG (Retrieval-Augmented Generation) pour générer des explications automatiques des alertes de sécurité.
+
+### Prérequis Ollama
+
+1. **Installer Ollama**
+   - Windows/Mac : Télécharger depuis [ollama.com](https://ollama.com/download)
+   - Linux :
+     ```bash
+     curl -fsSL https://ollama.com/install.sh | sh
+     ```
+
+2. **Installer les modèles requis**
+
+   ```bash
+   # Modèle LLM pour la génération de texte
+   ollama pull mistral:latest
+
+   # Modèle d'embeddings pour la recherche sémantique
+   ollama pull mxbai-embed-large
+   ```
+
+3. **Vérifier l'installation**
+
+   ```bash
+   ollama list
+   # Doit afficher mistral:latest et mxbai-embed-large
+   ```
+
+4. **Démarrer Ollama** (si non démarré automatiquement)
+   ```bash
+   # Le service écoute par défaut sur http://localhost:11434
+   ollama serve
+   ```
+
+### Configuration de l'environnement
+
+Par défaut, le backend se connecte à Ollama sur `http://localhost:11434`. Pour modifier :
+
+```bash
+# Dans .env
+OLLAMA_HOST=http://localhost:11434
+```
+
+### Initialiser la base de connaissances (optionnel)
+
+Pour améliorer les explications avec vos propres documents PDF :
+
+```bash
+# 1. Placer vos documents PDF dans data/pdf/
+cd backend
+
+# 2. Initialiser le vector store
+python scripts/init_vector_store.py
+
+# Note: ChromaDB peut avoir des problèmes de compatibilité entre versions.
+# Le système fonctionne sans vector store en utilisant les connaissances générales du LLM.
+```
+
+### Utilisation
+
+Une fois Ollama configuré et les modèles téléchargés, l'API `/api/rag/explain-alert` sera disponible pour générer des explications contextuelles des alertes.
+
+Interface frontend : cliquer sur une alerte dans le dashboard pour voir l'explication générée par l'IA.
+
 ## Mode gateway (optionnel)
 
 Pour que Suricata capture le trafic d'autres appareils du réseau :
@@ -95,13 +161,13 @@ vigilan/
 
 ## Stack
 
-| Composant | Technologie |
-|-----------|------------|
-| IDS Engine | Suricata (container Docker) |
-| Backend | FastAPI + SQLAlchemy + SQLite |
-| Frontend | Next.js 15 + Tailwind CSS |
-| Temps réel | WebSocket |
-| Infra | Docker Compose |
+| Composant  | Technologie                   |
+| ---------- | ----------------------------- |
+| IDS Engine | Suricata (container Docker)   |
+| Backend    | FastAPI + SQLAlchemy + SQLite |
+| Frontend   | Next.js 15 + Tailwind CSS     |
+| Temps réel | WebSocket                     |
+| Infra      | Docker Compose                |
 
 ## API
 
