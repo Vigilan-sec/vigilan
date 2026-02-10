@@ -81,7 +81,7 @@ services:
       lan:
         ipv4_address: 10.77.0.10
     ports:
-      - "2223:22"
+      - "127.0.0.1:2223:22"
     cap_add:
       - NET_ADMIN
     volumes:
@@ -97,7 +97,7 @@ services:
       lan:
         ipv4_address: 10.77.0.20
     ports:
-      - "2222:22"
+      - "127.0.0.1:2222:22"
     cap_add:
       - NET_ADMIN
       - NET_RAW
