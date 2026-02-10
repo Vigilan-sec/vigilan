@@ -56,7 +56,7 @@ export default function AlertsTable() {
           <option value="2">Medium</option>
           <option value="3">Low</option>
         </select>
-        <form onSubmit={handleSearch} className="flex flex-1 gap-2 min-w-[200px]">
+        <form onSubmit={handleSearch} className="flex flex-1 gap-2 min-w-50">
           <input
             type="text"
             value={searchInput}

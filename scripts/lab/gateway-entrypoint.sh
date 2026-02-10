@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 LAN_IFACE="${LAN_IFACE:-eth0}"
 WAN_IFACE="${WAN_IFACE:-eth1}"

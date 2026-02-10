@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 DEFAULT_GATEWAY="${DEFAULT_GATEWAY:-10.77.0.2}"
 
