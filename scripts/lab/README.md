@@ -1,6 +1,6 @@
 # Vigilan Lab (IDS)
 
-This lab simulates a small LAN where all traffic goes through a Suricata gateway.
+This lab simulates a dual-LAN setup where all traffic goes through a Suricata gateway.
 It is meant for IDS demos before moving to IPS.
 
 ## Start
@@ -25,14 +25,14 @@ docker compose up -d --build --remove-orphans
 ## SSH to victim
 
 ```
-docker exec -it vigilan-victim bash
+docker exec -it victim bash
 # SSH is also running inside the container
 ```
 
 ## Attacker shell
 
 ```
-docker exec -it vigilan-attacker bash
+docker exec -it attacker bash
 ```
 
 ## Traffic examples

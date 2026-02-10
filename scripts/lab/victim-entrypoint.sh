@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 
-DEFAULT_GATEWAY="${DEFAULT_GATEWAY:-10.77.0.2}"
+DEFAULT_GATEWAY="${DEFAULT_GATEWAY:-10.78.0.2}"
 
 mkdir -p /run/sshd
 if [ -z "$(ls -A /etc/ssh/ssh_host_* 2>/dev/null || true)" ]; then
@@ -13,8 +13,10 @@ sysctl -w net.ipv4.conf.default.accept_redirects=0
 
 # Demo-only credentials
 printf "root:root\n" | chpasswd
-sed -i "s/#PermitRootLogin.*/PermitRootLogin yes/" /etc/ssh/sshd_config
-sed -i "s/#PasswordAuthentication.*/PasswordAuthentication yes/" /etc/ssh/sshd_config
+sed -i "/^PermitRootLogin/d" /etc/ssh/sshd_config
+sed -i "/^PasswordAuthentication/d" /etc/ssh/sshd_config
+sed -i "/^PubkeyAuthentication/d" /etc/ssh/sshd_config
+printf "PermitRootLogin yes\nPasswordAuthentication yes\nPubkeyAuthentication yes\n" >> /etc/ssh/sshd_config
 if grep -q "^UseDNS" /etc/ssh/sshd_config; then
   sed -i "s/^UseDNS.*/UseDNS no/" /etc/ssh/sshd_config
 else

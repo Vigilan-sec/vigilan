@@ -13,15 +13,18 @@ services:
     networks:
       lan:
         ipv4_address: 10.77.0.2
+      lan2:
+        ipv4_address: 10.78.0.2
       wan:
         ipv4_address: 172.29.0.2
     volumes:
       - eve-lab-data:/var/log/suricata
       - ./scripts/lab:/lab
     environment:
-      - SURICATA_HOME_NET=[10.77.0.0/24]
+      - SURICATA_HOME_NET=[10.77.0.0/24,10.78.0.0/24]
       - LAN_IFACE=eth0
-      - WAN_IFACE=eth1
+      - LAN2_IFACE=eth1
+      - WAN_IFACE=eth2
     entrypoint: ["/bin/bash", "/lab/gateway-entrypoint.sh"]
     restart: unless-stopped
 
@@ -80,8 +83,8 @@ services:
       dockerfile: victim.Dockerfile
     container_name: victim
     networks:
-      lan:
-        ipv4_address: 10.77.0.10
+      lan2:
+        ipv4_address: 10.78.0.10
     ports:
       - "127.0.0.1:2223:22"
     cap_add:
@@ -90,7 +93,7 @@ services:
       - ./scripts/lab:/lab
       - ssh-keys-victim:/etc/ssh
     environment:
-      - DEFAULT_GATEWAY=10.77.0.2
+      - DEFAULT_GATEWAY=10.78.0.2
     entrypoint: ["/bin/bash", "/lab/victim-entrypoint.sh"]
 
   attacker:
@@ -117,6 +120,9 @@ services:
     networks:
       wan:
         ipv4_address: 172.29.0.80
+    volumes:
+      - ./scripts/lab/web:/usr/share/nginx/html:ro
+      - ./scripts/lab/web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
   dns:
     image: coredns/coredns:1.11.1
@@ -144,6 +150,11 @@ networks:
     ipam:
       config:
         - subnet: 10.77.0.0/24
+  lan2:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.78.0.0/24
   wan:
     driver: bridge
     ipam:

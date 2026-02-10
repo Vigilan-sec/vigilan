@@ -12,6 +12,18 @@ Suricata dans un container Docker capture le trafic réseau, un backend FastAPI 
 Docker (Suricata) → eve.json → shared volume → FastAPI → SQLite + WebSocket → Next.js
 ```
 
+Schema lab (dual-LAN, trafic force via la gateway):
+
+```
+attacker (10.77.0.20) ── LAN (10.77.0.0/24) ──
+							 |            \
+							 |             \  WAN (172.29.0.0/24)
+						 gateway (10.77.0.2 / 10.78.0.2 / 172.29.0.2)
+							 |             /
+							 |            /
+victim  (10.78.0.10) ── LAN2 (10.78.0.0/24) ──
+```
+
 ## Prérequis
 
 - Docker + Docker Compose
@@ -23,13 +35,7 @@ Le compose demarre un LAN simule (victime + attaquant) avec une gateway Suricata
 Les alertes alimentent le backend et le dashboard.
 
 ```bash
-docker compose up -d --build
-```
-
-Si vous voyez un warning d'orphelins, relancez avec:
-
-```bash
-docker compose up -d --build --remove-orphans
+docker compose up -d --force-recreate --remove-orphans
 ```
 
 Si vous avez des conflits de subnet, vous pouvez nettoyer les anciens reseaux Docker:
@@ -56,7 +62,7 @@ Scripts et exemples de trafic:
 
 - Voir scripts/lab/README.md
 - Voir scripts/lab/scenarios.sh
- 
+
 Arret:
 
 ```bash
