@@ -1,0 +1,9 @@
+.:53 {
+    log
+    errors
+    hosts {
+        172.29.0.80 bad.test
+        fallthrough
+    }
+    forward . 1.1.1.1 8.8.8.8
+}

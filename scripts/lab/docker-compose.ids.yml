@@ -1,36 +1,35 @@
-services:
+version: "3.9"
 
-#services réseaux pour le lab IDS
+services:
   gateway:
     build:
-      context: ./suricata
-      dockerfile: Dockerfile
-    container_name: vigilan-gateway
+      context: .
+      dockerfile: suricata/Dockerfile
+    container_name: vigilan-lab-gateway
     cap_add:
       - NET_ADMIN
       - NET_RAW
       - SYS_NICE
     networks:
       lan:
-        ipv4_address: 10.77.0.2
+        ipv4_address: 10.10.0.1
       wan:
-        ipv4_address: 172.29.0.2
+        ipv4_address: 172.20.0.1
     volumes:
       - eve-lab-data:/var/log/suricata
       - ./scripts/lab:/lab
     environment:
-      - SURICATA_HOME_NET=[10.77.0.0/24]
+      - SURICATA_HOME_NET=[10.10.0.0/24]
       - LAN_IFACE=eth0
       - WAN_IFACE=eth1
     entrypoint: ["/bin/bash", "/lab/gateway-entrypoint.sh"]
     restart: unless-stopped
 
-# Backend python pour le traitement du système
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: vigilan-backend
+    container_name: vigilan-lab-backend
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
@@ -53,8 +52,6 @@ services:
       retries: 3
       start_period: 10s
 
-
-# app node pour l'interface utilisateur
   frontend:
     build:
       context: ./frontend
@@ -62,7 +59,7 @@ services:
       args:
         - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL:-ws://localhost:8000/api/ws/alerts}
         - BACKEND_URL=${BACKEND_URL:-http://backend:8000}
-    container_name: vigilan-frontend
+    container_name: vigilan-lab-frontend
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
@@ -72,57 +69,47 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-
-# 1st vistim
   victim:
     image: ubuntu:22.04
-    container_name: victim
+    container_name: vigilan-lab-victim
     networks:
       lan:
-        ipv4_address: 10.77.0.10
-    ports:
-      - "2223:22"
+        ipv4_address: 10.10.0.10
     cap_add:
       - NET_ADMIN
     volumes:
       - ./scripts/lab:/lab
     environment:
-      - DEFAULT_GATEWAY=10.77.0.2
+      - DEFAULT_GATEWAY=10.10.0.1
     entrypoint: ["/bin/bash", "/lab/victim-entrypoint.sh"]
 
   attacker:
     image: nicolaka/netshoot
-    container_name: attacker
+    container_name: vigilan-lab-attacker
     networks:
       lan:
-        ipv4_address: 10.77.0.20
-    ports:
-      - "2222:22"
+        ipv4_address: 10.10.0.20
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    command: ["bash", "-lc", "ip route replace default via 10.10.0.1 && sleep infinity"]
     volumes:
       - ./scripts/lab:/lab
-    environment:
-      - DEFAULT_GATEWAY=10.77.0.2
-    entrypoint: ["/bin/bash", "/lab/attacker-entrypoint.sh"]
 
   malicious-web:
     image: nginx:alpine
-    container_name: vigilan-malicious-web
+    container_name: vigilan-lab-malicious-web
     networks:
       wan:
-        ipv4_address: 172.29.0.80
+        ipv4_address: 172.20.0.80
 
   dns:
-    image: coredns/coredns:1.11.1
-    container_name: dns
+    image: andyshinn/dnsmasq:2.85
+    container_name: vigilan-lab-dns
     networks:
       wan:
-        ipv4_address: 172.29.0.53
-    volumes:
-      - ./scripts/lab/Corefile:/etc/coredns/Corefile:ro
-    command: ["-conf", "/etc/coredns/Corefile"]
+        ipv4_address: 172.20.0.53
+    command: ["-k", "--log-facility=-", "--address=/bad.test/172.20.0.80"]
 
 volumes:
   eve-lab-data:
@@ -135,9 +122,9 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.77.0.0/24
+        - subnet: 10.10.0.0/24
   wan:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.29.0.0/24
+        - subnet: 172.20.0.0/24

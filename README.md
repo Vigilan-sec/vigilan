@@ -39,6 +39,37 @@ docker compose logs -f
 docker compose down
 ```
 
+## Lab IDS (LAN simule avec Docker)
+
+Ce compose demarre un LAN simule (victime + attaquant) avec une gateway Suricata en IDS.
+Les alertes alimentent le backend et le dashboard.
+
+```bash
+docker compose up -d --build
+```
+
+Si vous voyez un warning d'orphelins, relancez avec:
+
+```bash
+docker compose up -d --build --remove-orphans
+```
+
+Si vous avez des conflits de subnet, vous pouvez nettoyer les anciens reseaux Docker:
+
+```bash
+docker network prune
+```
+
+Acces:
+
+- Dashboard : http://localhost:3000
+- API docs  : http://localhost:8000/docs
+
+Scripts et exemples de trafic:
+
+- Voir scripts/lab/README.md
+- Voir scripts/lab/scenarios.sh
+
 ## Mode gateway (optionnel)
 
 Pour que Suricata capture le trafic d'autres appareils du réseau :
