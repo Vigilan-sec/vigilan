@@ -3,14 +3,6 @@ set -eu
 
 DEFAULT_GATEWAY="${DEFAULT_GATEWAY:-10.77.0.2}"
 
-apt-get update
-apt-get install -y --no-install-recommends \
-  openssh-server \
-  iproute2 \
-  iputils-ping \
-  curl \
-  dnsutils
-
 mkdir -p /run/sshd
 if [ -z "$(ls -A /etc/ssh/ssh_host_* 2>/dev/null || true)" ]; then
   ssh-keygen -A

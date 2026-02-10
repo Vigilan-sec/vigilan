@@ -5,7 +5,7 @@ services:
     build:
       context: ./suricata
       dockerfile: Dockerfile
-    container_name: vigilan-gateway
+    container_name: gateway
     cap_add:
       - NET_ADMIN
       - NET_RAW
@@ -30,7 +30,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: vigilan-backend
+    container_name: backend
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
@@ -62,7 +62,7 @@ services:
       args:
         - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL:-ws://localhost:8000/api/ws/alerts}
         - BACKEND_URL=${BACKEND_URL:-http://backend:8000}
-    container_name: vigilan-frontend
+    container_name: frontend
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
@@ -75,7 +75,9 @@ services:
 
 # 1st vistim
   victim:
-    image: ubuntu:22.04
+    build:
+      context: ./scripts/lab
+      dockerfile: victim.Dockerfile
     container_name: victim
     networks:
       lan:
@@ -111,7 +113,7 @@ services:
 
   malicious-web:
     image: nginx:alpine
-    container_name: vigilan-malicious-web
+    container_name: malicious-web
     networks:
       wan:
         ipv4_address: 172.29.0.80
