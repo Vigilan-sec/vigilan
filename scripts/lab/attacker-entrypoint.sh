@@ -11,7 +11,9 @@ else
 fi
 
 mkdir -p /run/sshd
-ssh-keygen -A
+if [ -z "$(ls -A /etc/ssh/ssh_host_* 2>/dev/null || true)" ]; then
+  ssh-keygen -A
+fi
 
 ip route replace default via "${DEFAULT_GATEWAY}"
 sysctl -w net.ipv4.conf.all.accept_redirects=0 || true
