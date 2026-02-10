@@ -14,6 +14,8 @@ mkdir -p /run/sshd
 ssh-keygen -A
 
 ip route replace default via "${DEFAULT_GATEWAY}"
+sysctl -w net.ipv4.conf.all.accept_redirects=0 || true
+sysctl -w net.ipv4.conf.default.accept_redirects=0 || true
 
 # Demo-only credentials
 printf "root:root\n" | chpasswd

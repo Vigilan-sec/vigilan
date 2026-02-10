@@ -11,10 +11,16 @@ echo "WAN interface: ${WAN_IFACE}"
 echo "HOME_NET: ${HOME_NET}"
 
 sysctl -w net.ipv4.ip_forward=1
+sysctl -w net.ipv4.conf.all.send_redirects=0
+sysctl -w net.ipv4.conf.default.send_redirects=0
+sysctl -w "net.ipv4.conf.${LAN_IFACE}.send_redirects=0"
+sysctl -w "net.ipv4.conf.${WAN_IFACE}.send_redirects=0"
 
 iptables -P FORWARD ACCEPT
 iptables -A FORWARD -i "${LAN_IFACE}" -o "${WAN_IFACE}" -j ACCEPT
 iptables -A FORWARD -i "${WAN_IFACE}" -o "${LAN_IFACE}" -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -t nat -A POSTROUTING -o "${WAN_IFACE}" -j MASQUERADE
+iptables -A OUTPUT -p icmp --icmp-type redirect -j DROP
 
 sed -i "s/interface: .*/interface: ${LAN_IFACE}/" /etc/suricata/suricata.yaml
 sed -i "s|HOME_NET: \".*\"|HOME_NET: \"${HOME_NET}\"|" /etc/suricata/suricata.yaml
