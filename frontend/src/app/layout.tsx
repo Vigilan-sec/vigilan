@@ -19,13 +19,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="dark">
+    <html lang="fr" data-theme="mocha">
       <body
-        className={`${geistMono.variable} font-mono antialiased bg-zinc-950 text-zinc-100`}
+        className={`${geistMono.variable} font-mono antialiased app-body`}
       >
         <div className="flex min-h-screen">
           <Sidebar />
-          <main className="flex-1 ml-56">{children}</main>
+          <main className="flex-1" style={{ marginLeft: "var(--sidebar-width)" }}>
+            {children}
+          </main>
         </div>
       </body>
     </html>

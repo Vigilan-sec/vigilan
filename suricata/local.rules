@@ -11,3 +11,16 @@ alert icmp any any -> any any (msg:"VIGILAN TEST - ICMP Ping Detected"; itype:8;
 
 # Alert on SSH connection
 alert tcp any any -> any 22 (msg:"VIGILAN TEST - SSH Connection Attempt"; flow:to_server,established; sid:9000004; rev:1;)
+
+# Demo rules
+# Suspicious DNS domain
+alert dns any any -> any any (msg:"VIGILAN DEMO - Suspicious DNS domain"; dns.query; content:"bad.test"; nocase; sid:9000101; rev:1;)
+
+# Potential DNS tunneling (long query)
+alert dns any any -> any any (msg:"VIGILAN DEMO - Possible DNS tunneling"; dns.query; pcre:"/[a-z0-9]{30,}\.bad\.test/i"; sid:9000102; rev:1;)
+
+# HTTP C2 beacon
+alert http any any -> any any (msg:"VIGILAN DEMO - C2 Beacon"; http.uri; content:"/c2/beacon"; nocase; sid:9000103; rev:1;)
+
+# HTTP malware download
+alert http any any -> any any (msg:"VIGILAN DEMO - Malware Download"; http.uri; content:"/download/update.exe"; nocase; sid:9000104; rev:1;)

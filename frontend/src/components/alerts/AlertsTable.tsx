@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import type { AlertRecord, PaginatedResponse } from "@/lib/types";
@@ -17,6 +17,50 @@ export default function AlertsTable() {
   const [searchInput, setSearchInput] = useState("");
   const [selectedAlert, setSelectedAlert] = useState<AlertRecord | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [colWidths, setColWidths] = useState<number[]>([
+    70, 170, 110, 280, 170, 170, 90, 100, 100,
+  ]);
+  const resizeState = useRef<{
+    index: number;
+    startX: number;
+    startWidth: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!resizeState.current) return;
+      const { index, startX, startWidth } = resizeState.current;
+      const delta = event.clientX - startX;
+      setColWidths((prev) => {
+        const next = [...prev];
+        next[index] = Math.max(70, startWidth + delta);
+        return next;
+      });
+    };
+
+    const handleMouseUp = () => {
+      if (!resizeState.current) return;
+      resizeState.current = null;
+      document.body.style.cursor = "";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  const handleResizeStart = (index: number, event: React.MouseEvent) => {
+    event.preventDefault();
+    resizeState.current = {
+      index,
+      startX: event.clientX,
+      startWidth: colWidths[index],
+    };
+    document.body.style.cursor = "col-resize";
+  };
 
   const params: Record<string, string> = { page: String(page), per_page: "25" };
   if (severity) params.severity = severity;
@@ -57,11 +101,11 @@ export default function AlertsTable() {
   return (
     <div className="space-y-4">
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-zinc-700/50 bg-zinc-800/50 p-4">
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-app surface-2 p-4">
         <select
           value={severity}
           onChange={handleSeverityChange}
-          className="rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-green-500/50"
+          className="rounded-md border px-3 py-2 text-sm input-base"
         >
           <option value="">All Severities</option>
           <option value="1">High</option>
@@ -74,11 +118,11 @@ export default function AlertsTable() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search signatures, IPs..."
-            className="flex-1 rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-green-500/50"
+            className="flex-1 rounded-md border px-3 py-2 text-sm input-base"
           />
           <button
             type="submit"
-            className="rounded-md bg-zinc-600 px-4 py-2 text-sm font-medium text-zinc-200 hover:bg-zinc-500 transition-colors"
+            className="rounded-md px-4 py-2 text-sm font-medium btn-base transition-colors"
           >
             Search
           </button>
@@ -90,7 +134,7 @@ export default function AlertsTable() {
               setSearchInput("");
               setPage(1);
             }}
-            className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+            className="text-xs text-muted hover:text-strong transition-colors"
           >
             Clear
           </button>
@@ -103,30 +147,46 @@ export default function AlertsTable() {
           Failed to load alerts: {error.message}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-zinc-700/50">
-          <table className="w-full text-sm text-left">
-            <thead className="sticky top-0 z-10 bg-zinc-800 text-xs uppercase text-zinc-400 border-b border-zinc-700/50">
+        <div className="overflow-x-auto rounded-lg border border-app">
+          <table className="w-full text-sm text-left table-fixed">
+            <thead className="sticky top-0 z-10 surface-2 text-xs uppercase text-muted border-b border-app">
               <tr>
-                <th className="px-4 py-3 font-medium">ID</th>
-                <th className="px-4 py-3 font-medium">Time</th>
-                <th className="px-4 py-3 font-medium">Severity</th>
-                <th className="px-4 py-3 font-medium">Signature</th>
-                <th className="px-4 py-3 font-medium">Src IP:Port</th>
-                <th className="px-4 py-3 font-medium">Dest IP:Port</th>
-                <th className="px-4 py-3 font-medium">Proto</th>
-                <th className="px-4 py-3 font-medium">Action</th>
-                <th className="px-4 py-3 font-medium text-center">Explain</th>
+                {[
+                  "ID",
+                  "Time",
+                  "Severity",
+                  "Signature",
+                  "Src IP:Port",
+                  "Dest IP:Port",
+                  "Proto",
+                  "Action",
+                ].map((label, index) => (
+                  <th
+                    key={label}
+                    className="relative px-4 py-3 font-medium"
+                    style={{ width: colWidths[index] }}
+                  >
+                    {label}
+                    <span
+                      onMouseDown={(event) => handleResizeStart(index, event)}
+                      className="absolute right-0 top-0 h-full w-2 cursor-col-resize"
+                    />
+                  </th>
+                ))}
+                <th
+                  className="px-4 py-3 font-medium text-center"
+                  style={{ width: colWidths[8] }}
+                >
+                  Explain
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-700/30">
+            <tbody className="divide-y divide-[color:var(--border)]">
               {isLoading ? (
                 <tr>
-                  <td
-                    colSpan={9}
-                    className="px-4 py-8 text-center text-zinc-500"
-                  >
+                  <td colSpan={9} className="px-4 py-8 text-center text-subtle">
                     <span className="inline-flex items-center gap-2">
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-300" />
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--border)] border-t-[color:var(--text-strong)]" />
                       Loading...
                     </span>
                   </td>
@@ -136,39 +196,57 @@ export default function AlertsTable() {
                   <tr
                     key={alert.id}
                     onClick={() => router.push(`/alerts/${alert.id}`)}
-                    className="cursor-pointer bg-zinc-900/50 hover:bg-zinc-700/40 transition-colors"
+                    className="cursor-pointer surface-1 hover-surface-3 transition-colors"
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-500">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle"
+                      style={{ width: colWidths[0] }}
+                    >
                       {alert.id}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-300 whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-muted whitespace-nowrap"
+                      style={{ width: colWidths[1] }}
+                    >
                       {formatTimestamp(alert.timestamp)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" style={{ width: colWidths[2] }}>
                       <SeverityBadge severity={alert.severity} />
                     </td>
-                    <td className="px-4 py-3 text-zinc-300 max-w-xs truncate">
+                    <td
+                      className="px-4 py-3 text-muted max-w-xs truncate"
+                      style={{ width: colWidths[3] }}
+                    >
                       {alert.signature}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-400 whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap"
+                      style={{ width: colWidths[4] }}
+                    >
                       {alert.src_ip}
                       {alert.src_port != null ? `:${alert.src_port}` : ""}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-400 whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap"
+                      style={{ width: colWidths[5] }}
+                    >
                       {alert.dest_ip}
                       {alert.dest_port != null ? `:${alert.dest_port}` : ""}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" style={{ width: colWidths[6] }}>
                       <span
                         className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${protocolColor(alert.proto)}`}
                       >
                         {alert.proto ?? "--"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs font-medium text-zinc-300 uppercase">
+                    <td
+                      className="px-4 py-3 text-xs font-medium text-muted uppercase"
+                      style={{ width: colWidths[7] }}
+                    >
                       {alert.action}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" style={{ width: colWidths[8] }}>
                       <button
                         onClick={(e) => handleExplain(e, alert)}
                         className="px-3 py-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md transition-colors"
@@ -181,10 +259,7 @@ export default function AlertsTable() {
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={9}
-                    className="px-4 py-8 text-center text-zinc-500"
-                  >
+                  <td colSpan={9} className="px-4 py-8 text-center text-subtle">
                     No alerts found
                   </td>
                 </tr>
@@ -196,21 +271,21 @@ export default function AlertsTable() {
 
       {/* Pagination */}
       {data && data.pages > 1 && (
-        <div className="flex items-center justify-between rounded-lg border border-zinc-700/50 bg-zinc-800/50 px-4 py-3">
-          <p className="text-xs text-zinc-400">
+        <div className="flex items-center justify-between rounded-lg border border-app surface-2 px-4 py-3">
+          <p className="text-xs text-muted">
             Showing page {data.page} of {data.pages} ({data.total} total alerts)
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="rounded-md border border-zinc-600 bg-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
             {generatePageNumbers(data.page, data.pages).map((p, i) =>
               p === null ? (
-                <span key={`ellipsis-${i}`} className="text-zinc-500 px-1">
+                <span key={`ellipsis-${i}`} className="text-subtle px-1">
                   ...
                 </span>
               ) : (
@@ -219,8 +294,8 @@ export default function AlertsTable() {
                   onClick={() => setPage(p)}
                   className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                     p === page
-                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                      : "border border-zinc-600 bg-zinc-700 text-zinc-300 hover:bg-zinc-600"
+                      ? "accent-chip border"
+                      : "border input-base hover-surface-3"
                   }`}
                 >
                   {p}
@@ -230,7 +305,7 @@ export default function AlertsTable() {
             <button
               onClick={() => setPage((p) => Math.min(data.pages, p + 1))}
               disabled={page >= data.pages}
-              className="rounded-md border border-zinc-600 bg-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>

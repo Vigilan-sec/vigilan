@@ -18,7 +18,7 @@ export default function SummaryCards({ alertStats, flowStats }: SummaryCardsProp
     {
       label: "Total Alerts",
       value: alertStats ? formatNumber(alertStats.total) : "--",
-      color: "text-zinc-100",
+      color: "text-strong",
       subtext: "All time",
     },
     {
@@ -46,16 +46,16 @@ export default function SummaryCards({ alertStats, flowStats }: SummaryCardsProp
       {cards.map((card) => (
         <div
           key={card.label}
-          className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 p-5"
+          className="rounded-lg border border-app surface-2 p-5"
         >
-          <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+          <p className="text-xs font-medium text-muted uppercase tracking-wider">
             {card.label}
           </p>
           <p className={`mt-2 text-2xl font-bold font-mono ${card.color}`}>
             {card.value}
           </p>
           {card.subtext && (
-            <p className="mt-1 text-xs text-zinc-500">{card.subtext}</p>
+            <p className="mt-1 text-xs text-subtle">{card.subtext}</p>
           )}
         </div>
       ))}

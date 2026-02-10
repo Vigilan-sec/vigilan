@@ -226,3 +226,4 @@ backend/data/
 
 # === Docker ===
 .env.docker
+scripts/fix_entrypoints.py

@@ -12,30 +12,60 @@ Suricata dans un container Docker capture le trafic réseau, un backend FastAPI 
 Docker (Suricata) → eve.json → shared volume → FastAPI → SQLite + WebSocket → Next.js
 ```
 
+Schema lab (dual-LAN, trafic force via la gateway):
+
+```
+attacker (10.77.0.20) ── LAN (10.77.0.0/24) ──
+							 |            \
+							 |             \  WAN (172.29.0.0/24)
+						 gateway (10.77.0.2 / 10.78.0.2 / 172.29.0.2)
+							 |             /
+							 |            /
+victim  (10.78.0.10) ── LAN2 (10.78.0.0/24) ──
+```
+
 ## Prérequis
 
 - Docker + Docker Compose
 - (Optionnel pour dev local) Python 3.11+, Node.js 18+
 
-## Quickstart (Docker)
+## Quickstart (Lab IDS)
+
+Le compose demarre un LAN simule (victime + attaquant) avec une gateway Suricata en IDS.
+Les alertes alimentent le backend et le dashboard.
 
 ```bash
-# 1. Configurer l'environnement
-cp .env.docker .env
-# Éditer .env : mettre SURICATA_INTERFACE au nom de votre interface réseau (ip link show)
+docker compose up -d --force-recreate --remove-orphans
+```
 
-# 2. Build et lancement
-docker compose build
-docker compose up -d
+Si vous avez des conflits de subnet, vous pouvez nettoyer les anciens reseaux Docker:
 
-# 3. Accès
-# Dashboard : http://localhost:3000
-# API docs  : http://localhost:8000/docs
+```bash
+docker network prune
+```
 
-# 4. Logs
-docker compose logs -f
+Acces:
 
-# 5. Arrêt
+- Dashboard : http://localhost:3000
+- API docs  : http://localhost:8000/docs
+
+SSH (depuis l'hote macOS):
+
+```bash
+ssh root@127.0.0.1 -p 2222  # attacker
+ssh root@127.0.0.1 -p 2223  # victim
+```
+
+Mot de passe: `root`
+
+Scripts et exemples de trafic:
+
+- Voir scripts/lab/README.md
+- Voir scripts/lab/scenarios.sh
+
+Arret:
+
+```bash
 docker compose down
 ```
 
@@ -105,14 +135,81 @@ Une fois Ollama configuré et les modèles téléchargés, l'API `/api/rag/expla
 
 Interface frontend : cliquer sur une alerte dans le dashboard pour voir l'explication générée par l'IA.
 
-## Mode gateway (optionnel)
+## Configuration LLM/RAG (optionnel)
 
-Pour que Suricata capture le trafic d'autres appareils du réseau :
+Le système inclut une fonctionnalité RAG (Retrieval-Augmented Generation) pour générer des explications automatiques des alertes de sécurité.
+
+### Prérequis Ollama
+
+1. **Installer Ollama**
+   - Windows/Mac : Télécharger depuis [ollama.com](https://ollama.com/download)
+   - Linux :
+     ```bash
+     curl -fsSL https://ollama.com/install.sh | sh
+     ```
+
+2. **Installer les modèles requis**
+
+   ```bash
+   # Modèle LLM pour la génération de texte
+   ollama pull mistral:latest
+
+   # Modèle d'embeddings pour la recherche sémantique
+   ollama pull mxbai-embed-large
+   ```
+
+3. **Vérifier l'installation**
+
+   ```bash
+   ollama list
+   # Doit afficher mistral:latest et mxbai-embed-large
+   ```
+
+4. **Démarrer Ollama** (si non démarré automatiquement)
+   ```bash
+   # Le service écoute par défaut sur http://localhost:11434
+   ollama serve
+   ```
+
+### Configuration de l'environnement
+
+Par défaut, le backend se connecte à Ollama sur `http://localhost:11434`. Pour modifier :
 
 ```bash
-# Éditer .env : GATEWAY_MODE=true
-# Sur les autres appareils, configurer la passerelle par défaut vers l'IP de l'hôte Docker
-docker compose up -d suricata
+# Dans .env
+OLLAMA_HOST=http://localhost:11434
+```
+
+### Initialiser la base de connaissances (optionnel)
+
+Pour améliorer les explications avec vos propres documents PDF :
+
+```bash
+# 1. Placer vos documents PDF dans data/pdf/
+cd backend
+
+# 2. Initialiser le vector store
+python scripts/init_vector_store.py
+
+# Note: ChromaDB peut avoir des problèmes de compatibilité entre versions.
+# Le système fonctionne sans vector store en utilisant les connaissances générales du LLM.
+```
+
+### Utilisation
+
+Une fois Ollama configuré et les modèles téléchargés, l'API `/api/rag/explain-alert` sera disponible pour générer des explications contextuelles des alertes.
+
+Interface frontend : cliquer sur une alerte dans le dashboard pour voir l'explication générée par l'IA.
+
+Depannage rapide:
+
+```bash
+# Connexion refusee au debut: attendre la fin de l'installation dans la victime
+docker logs victim --tail 200
+
+# Cle hote SSH changee apres un recreate
+ssh-keygen -R "[localhost]:2222"
+ssh-keygen -R "[localhost]:2223"
 ```
 
 ## Quickstart (mode mock, sans Suricata)
@@ -161,13 +258,13 @@ vigilan/
 
 ## Stack
 
-| Composant  | Technologie                   |
-| ---------- | ----------------------------- |
-| IDS Engine | Suricata (container Docker)   |
-| Backend    | FastAPI + SQLAlchemy + SQLite |
-| Frontend   | Next.js 15 + Tailwind CSS     |
+| Composant   | Technologie                   |
+| ----------- | ----------------------------- |
+| IDS Engine  | Suricata (container Docker)   |
+| Backend     | FastAPI + SQLAlchemy + SQLite |
+| Frontend    | Next.js 15 + Tailwind CSS     |
 | Temps réel | WebSocket                     |
-| Infra      | Docker Compose                |
+| Infra       | Docker Compose                |
 
 ## API
 

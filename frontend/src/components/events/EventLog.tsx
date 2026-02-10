@@ -13,14 +13,14 @@ const eventTypeColors: Record<string, string> = {
   http: "bg-green-500/20 text-green-400",
   tls: "bg-purple-500/20 text-purple-400",
   fileinfo: "bg-orange-500/20 text-orange-400",
-  stats: "bg-zinc-500/20 text-zinc-400",
+  stats: "chip-muted",
   anomaly: "bg-yellow-500/20 text-yellow-400",
   ssh: "bg-indigo-500/20 text-indigo-400",
   smtp: "bg-pink-500/20 text-pink-400",
 };
 
 function getEventTypeColor(type: string): string {
-  return eventTypeColors[type.toLowerCase()] ?? "bg-zinc-500/20 text-zinc-300";
+  return eventTypeColors[type.toLowerCase()] ?? "chip-muted";
 }
 
 export default function EventLog() {
@@ -68,8 +68,8 @@ export default function EventLog() {
         <div className="space-y-2">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <span className="inline-flex items-center gap-2 text-sm text-zinc-500">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-500 border-t-zinc-300" />
+              <span className="inline-flex items-center gap-2 text-sm text-subtle">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--border)] border-t-[color:var(--text-strong)]" />
                 Loading events...
               </span>
             </div>
@@ -79,21 +79,21 @@ export default function EventLog() {
               return (
                 <div
                   key={event.id}
-                  className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 overflow-hidden"
+                  className="rounded-lg border border-app surface-2 overflow-hidden"
                 >
                   {/* Row Header */}
                   <button
                     onClick={() => toggleRow(event.id)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-zinc-700/40 transition-colors"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left hover-surface-3 transition-colors"
                   >
                     <span
-                      className={`transform transition-transform text-zinc-500 text-xs ${
+                      className={`transform transition-transform text-subtle text-xs ${
                         isExpanded ? "rotate-90" : ""
                       }`}
                     >
                       &#9654;
                     </span>
-                    <span className="font-mono text-xs text-zinc-400 w-28 shrink-0">
+                    <span className="font-mono text-xs text-muted w-28 shrink-0">
                       {formatTimestamp(event.timestamp)}
                     </span>
                     <span
@@ -101,7 +101,7 @@ export default function EventLog() {
                     >
                       {event.event_type}
                     </span>
-                    <span className="font-mono text-xs text-zinc-500 truncate">
+                    <span className="font-mono text-xs text-subtle truncate">
                       {event.raw_json.length > 120
                         ? event.raw_json.slice(0, 120) + "..."
                         : event.raw_json}
@@ -110,19 +110,19 @@ export default function EventLog() {
 
                   {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="border-t border-zinc-700/50 bg-zinc-900/80 p-4">
-                      <div className="mb-2 flex items-center gap-4 text-xs text-zinc-500">
+                    <div className="border-t border-app surface-1 p-4">
+                      <div className="mb-2 flex items-center gap-4 text-xs text-subtle">
                         <span>
-                          ID: <span className="font-mono text-zinc-400">{event.id}</span>
+                          ID: <span className="font-mono text-muted">{event.id}</span>
                         </span>
                         <span>
                           Ingested:{" "}
-                          <span className="font-mono text-zinc-400">
+                          <span className="font-mono text-muted">
                             {formatTimestamp(event.ingested_at)}
                           </span>
                         </span>
                       </div>
-                      <pre className="overflow-x-auto rounded border border-zinc-700/30 bg-zinc-950 p-4 text-xs font-mono text-zinc-300 leading-relaxed max-h-96 overflow-y-auto">
+                      <pre className="overflow-x-auto rounded border border-app surface-2 p-4 text-xs font-mono text-muted leading-relaxed max-h-96 overflow-y-auto">
                         {formatJson(event.raw_json)}
                       </pre>
                     </div>
@@ -131,7 +131,7 @@ export default function EventLog() {
               );
             })
           ) : (
-            <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 px-4 py-8 text-center text-zinc-500 text-sm">
+            <div className="rounded-lg border border-app surface-2 px-4 py-8 text-center text-subtle text-sm">
               No events found
             </div>
           )}
@@ -140,25 +140,25 @@ export default function EventLog() {
 
       {/* Pagination */}
       {data && data.pages > 1 && (
-        <div className="flex items-center justify-between rounded-lg border border-zinc-700/50 bg-zinc-800/50 px-4 py-3">
-          <p className="text-xs text-zinc-400">
+        <div className="flex items-center justify-between rounded-lg border border-app surface-2 px-4 py-3">
+          <p className="text-xs text-muted">
             Showing page {data.page} of {data.pages} ({data.total} total events)
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="rounded-md border border-zinc-600 bg-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
-            <span className="text-xs font-mono text-zinc-400">
+            <span className="text-xs font-mono text-muted">
               {data.page} / {data.pages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(data.pages, p + 1))}
               disabled={page >= data.pages}
-              className="rounded-md border border-zinc-600 bg-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>

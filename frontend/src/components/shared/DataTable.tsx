@@ -32,9 +32,9 @@ export default function DataTable<T>({
   emptyMessage = "No data available",
 }: DataTableProps<T>) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-zinc-700/50">
+    <div className="overflow-x-auto rounded-lg border border-app">
       <table className="w-full text-sm text-left">
-        <thead className="sticky top-0 z-10 bg-zinc-800 text-xs uppercase text-zinc-400 border-b border-zinc-700/50">
+        <thead className="sticky top-0 z-10 surface-2 text-xs uppercase text-muted border-b border-app">
           <tr>
             {columns.map((col, i) => (
               <th
@@ -46,12 +46,12 @@ export default function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-700/30">
+        <tbody className="divide-y divide-[color:var(--border)]">
           {data.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-8 text-center text-zinc-500"
+                className="px-4 py-8 text-center text-subtle"
               >
                 {emptyMessage}
               </td>
@@ -61,10 +61,10 @@ export default function DataTable<T>({
               <tr
                 key={rowIdx}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
-                className={`bg-zinc-900/50 transition-colors ${
+                className={`surface-1 transition-colors ${
                   onRowClick
-                    ? "cursor-pointer hover:bg-zinc-700/40"
-                    : "hover:bg-zinc-800/60"
+                    ? "cursor-pointer hover-surface-3"
+                    : "hover-surface-2"
                 }`}
               >
                 {columns.map((col, colIdx) => (

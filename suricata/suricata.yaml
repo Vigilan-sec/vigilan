@@ -37,7 +37,10 @@ outputs:
 
 # Use pcap on Docker Desktop; AF_PACKET is not supported reliably.
 pcap:
-  - interface: eth0
+  - interface: LAN_IFACE
+    buffer-size: 67108864
+    checksum-checks: auto
+  - interface: LAN2_IFACE
     buffer-size: 67108864
     checksum-checks: auto
 
