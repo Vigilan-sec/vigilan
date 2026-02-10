@@ -8,6 +8,9 @@ set -euo pipefail
 echo "Ping victim"
 ping -c 3 10.78.0.10
 
+echo "SSH attempt to victim"
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes -o ConnectTimeout=5 root@10.78.0.10 "exit" || true
+
 echo "HTTP request to malicious web"
 curl -I http://172.29.0.80
 

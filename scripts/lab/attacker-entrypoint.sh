@@ -64,5 +64,17 @@ printf "\033[0m\n"
 EOF
 chmod +x /etc/profile.d/vigilan.sh
 
+SCENARIOS_PATH="/lab/scenarios.sh"
+if [ "${RUN_SCENARIOS:-1}" = "1" ] && [ -f "${SCENARIOS_PATH}" ]; then
+  echo "Running attacker scenarios every 5 minutes from ${SCENARIOS_PATH}"
+  (
+    while true; do
+      printf "[%s] Running scenarios\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      /bin/bash "${SCENARIOS_PATH}"
+      sleep 60
+    done
+  ) >/var/log/vigilan-scenarios.log 2>&1 &
+fi
+
 echo "Attacker ready. SSH: root/root"
 exec /usr/sbin/sshd -D
