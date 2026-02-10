@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import type { AlertRecord, PaginatedResponse } from "@/lib/types";
@@ -14,6 +14,50 @@ export default function AlertsTable() {
   const [severity, setSeverity] = useState("");
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [colWidths, setColWidths] = useState<number[]>([
+    70, 170, 110, 280, 170, 170, 90, 100,
+  ]);
+  const resizeState = useRef<{
+    index: number;
+    startX: number;
+    startWidth: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!resizeState.current) return;
+      const { index, startX, startWidth } = resizeState.current;
+      const delta = event.clientX - startX;
+      setColWidths((prev) => {
+        const next = [...prev];
+        next[index] = Math.max(70, startWidth + delta);
+        return next;
+      });
+    };
+
+    const handleMouseUp = () => {
+      if (!resizeState.current) return;
+      resizeState.current = null;
+      document.body.style.cursor = "";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  const handleResizeStart = (index: number, event: React.MouseEvent) => {
+    event.preventDefault();
+    resizeState.current = {
+      index,
+      startX: event.clientX,
+      startWidth: colWidths[index],
+    };
+    document.body.style.cursor = "col-resize";
+  };
 
   const params: Record<string, string> = { page: String(page), per_page: "25" };
   if (severity) params.severity = severity;
@@ -92,17 +136,31 @@ export default function AlertsTable() {
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-app">
-          <table className="w-full text-sm text-left">
+          <table className="w-full text-sm text-left table-fixed">
             <thead className="sticky top-0 z-10 surface-2 text-xs uppercase text-muted border-b border-app">
               <tr>
-                <th className="px-4 py-3 font-medium">ID</th>
-                <th className="px-4 py-3 font-medium">Time</th>
-                <th className="px-4 py-3 font-medium">Severity</th>
-                <th className="px-4 py-3 font-medium">Signature</th>
-                <th className="px-4 py-3 font-medium">Src IP:Port</th>
-                <th className="px-4 py-3 font-medium">Dest IP:Port</th>
-                <th className="px-4 py-3 font-medium">Proto</th>
-                <th className="px-4 py-3 font-medium">Action</th>
+                {[
+                  "ID",
+                  "Time",
+                  "Severity",
+                  "Signature",
+                  "Src IP:Port",
+                  "Dest IP:Port",
+                  "Proto",
+                  "Action",
+                ].map((label, index) => (
+                  <th
+                    key={label}
+                    className="relative px-4 py-3 font-medium"
+                    style={{ width: colWidths[index] }}
+                  >
+                    {label}
+                    <span
+                      onMouseDown={(event) => handleResizeStart(index, event)}
+                      className="absolute right-0 top-0 h-full w-2 cursor-col-resize"
+                    />
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-[color:var(--border)]">
@@ -122,34 +180,52 @@ export default function AlertsTable() {
                     onClick={() => router.push(`/alerts/${alert.id}`)}
                     className="cursor-pointer surface-1 hover-surface-3 transition-colors"
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-subtle">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle"
+                      style={{ width: colWidths[0] }}
+                    >
                       {alert.id}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-muted whitespace-nowrap"
+                      style={{ width: colWidths[1] }}
+                    >
                       {formatTimestamp(alert.timestamp)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" style={{ width: colWidths[2] }}>
                       <SeverityBadge severity={alert.severity} />
                     </td>
-                    <td className="px-4 py-3 text-muted max-w-xs truncate">
+                    <td
+                      className="px-4 py-3 text-muted max-w-xs truncate"
+                      style={{ width: colWidths[3] }}
+                    >
                       {alert.signature}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap"
+                      style={{ width: colWidths[4] }}
+                    >
                       {alert.src_ip}
                       {alert.src_port != null ? `:${alert.src_port}` : ""}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap"
+                      style={{ width: colWidths[5] }}
+                    >
                       {alert.dest_ip}
                       {alert.dest_port != null ? `:${alert.dest_port}` : ""}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" style={{ width: colWidths[6] }}>
                       <span
                         className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${protocolColor(alert.proto)}`}
                       >
                         {alert.proto ?? "--"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs font-medium text-muted uppercase">
+                    <td
+                      className="px-4 py-3 text-xs font-medium text-muted uppercase"
+                      style={{ width: colWidths[7] }}
+                    >
                       {alert.action}
                     </td>
                   </tr>

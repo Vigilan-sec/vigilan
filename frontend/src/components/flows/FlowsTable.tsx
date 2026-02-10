@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import type { FlowRecord, PaginatedResponse } from "@/lib/types";
 import { fetchFlows } from "@/lib/api";
@@ -8,6 +8,50 @@ import { formatTimestamp, protocolColor, formatBytes, formatNumber } from "@/lib
 
 export default function FlowsTable() {
   const [page, setPage] = useState(1);
+  const [colWidths, setColWidths] = useState<number[]>([
+    170, 90, 180, 180, 120, 120, 90, 90, 90, 90,
+  ]);
+  const resizeState = useRef<{
+    index: number;
+    startX: number;
+    startWidth: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!resizeState.current) return;
+      const { index, startX, startWidth } = resizeState.current;
+      const delta = event.clientX - startX;
+      setColWidths((prev) => {
+        const next = [...prev];
+        next[index] = Math.max(80, startWidth + delta);
+        return next;
+      });
+    };
+
+    const handleMouseUp = () => {
+      if (!resizeState.current) return;
+      resizeState.current = null;
+      document.body.style.cursor = "";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  const handleResizeStart = (index: number, event: React.MouseEvent) => {
+    event.preventDefault();
+    resizeState.current = {
+      index,
+      startX: event.clientX,
+      startWidth: colWidths[index],
+    };
+    document.body.style.cursor = "col-resize";
+  };
 
   const params: Record<string, string> = {
     page: String(page),
@@ -29,27 +73,35 @@ export default function FlowsTable() {
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-app">
-          <table className="w-full text-sm text-left">
+          <table className="w-full text-sm text-left table-fixed">
             <thead className="sticky top-0 z-10 surface-2 text-xs uppercase text-muted border-b border-app">
               <tr>
-                <th className="px-4 py-3 font-medium">Time</th>
-                <th className="px-4 py-3 font-medium">Proto</th>
-                <th className="px-4 py-3 font-medium">Source</th>
-                <th className="px-4 py-3 font-medium">Destination</th>
-                <th className="px-4 py-3 font-medium text-right">
-                  Bytes &uarr;
-                </th>
-                <th className="px-4 py-3 font-medium text-right">
-                  Bytes &darr;
-                </th>
-                <th className="px-4 py-3 font-medium text-right">
-                  Pkts &uarr;
-                </th>
-                <th className="px-4 py-3 font-medium text-right">
-                  Pkts &darr;
-                </th>
-                <th className="px-4 py-3 font-medium text-right">Duration</th>
-                <th className="px-4 py-3 font-medium">State</th>
+                {[
+                  "Time",
+                  "Proto",
+                  "Source",
+                  "Destination",
+                  "Bytes \u2191",
+                  "Bytes \u2193",
+                  "Pkts \u2191",
+                  "Pkts \u2193",
+                  "Duration",
+                  "State",
+                ].map((label, index) => (
+                  <th
+                    key={label}
+                    className={`relative px-4 py-3 font-medium ${
+                      index >= 4 && index <= 8 ? "text-right" : ""
+                    }`}
+                    style={{ width: colWidths[index] }}
+                  >
+                    {label}
+                    <span
+                      onMouseDown={(event) => handleResizeStart(index, event)}
+                      className="absolute right-0 top-0 h-full w-2 cursor-col-resize"
+                    />
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-[color:var(--border)]">
@@ -68,40 +120,64 @@ export default function FlowsTable() {
                     key={flow.id}
                     className="surface-1 hover-surface-3 transition-colors"
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-muted whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-muted whitespace-nowrap"
+                      style={{ width: colWidths[0] }}
+                    >
                       {formatTimestamp(flow.timestamp)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" style={{ width: colWidths[1] }}>
                       <span
                         className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${protocolColor(flow.proto)}`}
                       >
                         {flow.proto ?? "--"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap"
+                      style={{ width: colWidths[2] }}
+                    >
                       {flow.src_ip}
                       {flow.src_port != null ? `:${flow.src_port}` : ""}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle whitespace-nowrap"
+                      style={{ width: colWidths[3] }}
+                    >
                       {flow.dest_ip}
                       {flow.dest_port != null ? `:${flow.dest_port}` : ""}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted text-right whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-muted text-right whitespace-nowrap"
+                      style={{ width: colWidths[4] }}
+                    >
                       {formatBytes(flow.bytes_toserver)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted text-right whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-muted text-right whitespace-nowrap"
+                      style={{ width: colWidths[5] }}
+                    >
                       {formatBytes(flow.bytes_toclient)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-subtle text-right">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle text-right"
+                      style={{ width: colWidths[6] }}
+                    >
                       {formatNumber(flow.pkts_toserver)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-subtle text-right">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle text-right"
+                      style={{ width: colWidths[7] }}
+                    >
                       {formatNumber(flow.pkts_toclient)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-subtle text-right whitespace-nowrap">
+                    <td
+                      className="px-4 py-3 font-mono text-xs text-subtle text-right whitespace-nowrap"
+                      style={{ width: colWidths[8] }}
+                    >
                       {flow.age != null ? `${flow.age}s` : "--"}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" style={{ width: colWidths[9] }}>
                       <FlowStateBadge state={flow.state} />
                     </td>
                   </tr>

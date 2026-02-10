@@ -8,6 +8,8 @@
 
 :root,
 [data-theme="mocha"] {
+  --sidebar-width: 14rem;
+  --sidebar-collapsed-width: 4rem;
   --app-bg: #11111b;
   --surface-1: #1e1e2e;
   --surface-2: #181825;
@@ -19,6 +21,37 @@
   --accent: #a6e3a1;
   --accent-soft: rgba(166, 227, 161, 0.18);
   --accent-border: rgba(166, 227, 161, 0.38);
+}
+
+[data-sidebar="collapsed"] {
+  --sidebar-width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-shell {
+  width: var(--sidebar-width);
+  transition: width 200ms ease;
+}
+
+.sidebar-nav-item {
+  transition: padding 200ms ease, gap 200ms ease;
+}
+
+[data-sidebar="collapsed"] .sidebar-label,
+[data-sidebar="collapsed"] .sidebar-title,
+[data-sidebar="collapsed"] .sidebar-subtitle,
+[data-sidebar="collapsed"] .sidebar-footer-text {
+  display: none;
+}
+
+[data-sidebar="collapsed"] .sidebar-nav-item {
+  gap: 0;
+  justify-content: center;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+[data-sidebar="collapsed"] .sidebar-nav-item .sidebar-icon {
+  width: auto;
 }
 
 [data-theme="macchiato"] {
