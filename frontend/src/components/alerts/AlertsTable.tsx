@@ -7,6 +7,7 @@ import type { AlertRecord, PaginatedResponse } from "@/lib/types";
 import { fetchAlerts } from "@/lib/api";
 import { formatTimestamp, protocolColor } from "@/lib/utils";
 import SeverityBadge from "@/components/alerts/SeverityBadge";
+import ExplanationModal from "@/components/alerts/ExplanationModal";
 
 export default function AlertsTable() {
   const router = useRouter();
@@ -14,8 +15,10 @@ export default function AlertsTable() {
   const [severity, setSeverity] = useState("");
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [selectedAlert, setSelectedAlert] = useState<AlertRecord | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [colWidths, setColWidths] = useState<number[]>([
-    70, 170, 110, 280, 170, 170, 90, 100,
+    70, 170, 110, 280, 170, 170, 90, 100, 100,
   ]);
   const resizeState = useRef<{
     index: number;
@@ -66,7 +69,7 @@ export default function AlertsTable() {
   const { data, error, isLoading } = useSWR<PaginatedResponse<AlertRecord>>(
     ["alerts", page, severity, search],
     () => fetchAlerts(params),
-    { refreshInterval: 10000 }
+    { refreshInterval: 10000 },
   );
 
   const handleSearch = useCallback(
@@ -75,7 +78,7 @@ export default function AlertsTable() {
       setSearch(searchInput);
       setPage(1);
     },
-    [searchInput]
+    [searchInput],
   );
 
   const handleSeverityChange = useCallback(
@@ -83,7 +86,16 @@ export default function AlertsTable() {
       setSeverity(e.target.value);
       setPage(1);
     },
-    []
+    [],
+  );
+
+  const handleExplain = useCallback(
+    (e: React.MouseEvent, alert: AlertRecord) => {
+      e.stopPropagation();
+      setSelectedAlert(alert);
+      setIsModalOpen(true);
+    },
+    [],
   );
 
   return (
@@ -161,12 +173,18 @@ export default function AlertsTable() {
                     />
                   </th>
                 ))}
+                <th
+                  className="px-4 py-3 font-medium text-center"
+                  style={{ width: colWidths[8] }}
+                >
+                  Explain
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[color:var(--border)]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-subtle">
+                  <td colSpan={9} className="px-4 py-8 text-center text-subtle">
                     <span className="inline-flex items-center gap-2">
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--border)] border-t-[color:var(--text-strong)]" />
                       Loading...
@@ -228,14 +246,20 @@ export default function AlertsTable() {
                     >
                       {alert.action}
                     </td>
+                    <td className="px-4 py-3" style={{ width: colWidths[8] }}>
+                      <button
+                        onClick={(e) => handleExplain(e, alert)}
+                        className="px-3 py-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md transition-colors"
+                        title="Explain this alert"
+                      >
+                        Explain
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={8}
-                    className="px-4 py-8 text-center text-subtle"
-                  >
+                  <td colSpan={9} className="px-4 py-8 text-center text-subtle">
                     No alerts found
                   </td>
                 </tr>
@@ -276,7 +300,7 @@ export default function AlertsTable() {
                 >
                   {p}
                 </button>
-              )
+              ),
             )}
             <button
               onClick={() => setPage((p) => Math.min(data.pages, p + 1))}
@@ -288,13 +312,25 @@ export default function AlertsTable() {
           </div>
         </div>
       )}
+
+      {/* Explanation Modal */}
+      {selectedAlert && (
+        <ExplanationModal
+          alert={selectedAlert}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedAlert(null);
+          }}
+        />
+      )}
     </div>
   );
 }
 
 function generatePageNumbers(
   current: number,
-  total: number
+  total: number,
 ): (number | null)[] {
   if (total <= 7) {
     return Array.from({ length: total }, (_, i) => i + 1);

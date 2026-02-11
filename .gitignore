@@ -206,6 +206,13 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+# RAG System
+storage/
+
+# uploaded files in the data folder
+data/*
+!data/
+
 # === Node.js ===
 node_modules/
 .next/

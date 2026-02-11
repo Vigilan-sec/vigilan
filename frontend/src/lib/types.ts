@@ -93,3 +93,17 @@ export interface HealthStatus {
   status: string;
   version: string;
 }
+
+export interface AlertExplanationRequest {
+  signature: string;
+  category?: string | null;
+  severity?: number | null;
+  src_ip?: string | null;
+  dest_ip?: string | null;
+  proto?: string | null;
+}
+
+export interface AlertExplanationResponse {
+  explanation: string;
+  sources_found: number;
+}

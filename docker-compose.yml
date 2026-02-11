@@ -39,18 +39,29 @@ services:
     volumes:
       - eve-lab-data:/data/eve
       - db-lab-data:/data/db
+      - ./chroma:/app/chroma:ro
+      - ./data/pdf:/app/data/pdf:ro
     environment:
       - VIGILAN_EVE_JSON_PATH=/data/eve/eve.json
       - VIGILAN_DATABASE_URL=sqlite+aiosqlite:////data/db/vigilan.db
       - VIGILAN_CORS_ORIGINS=["http://localhost:3000","http://localhost:${FRONTEND_PORT:-3000}"]
       - VIGILAN_EVE_WATCHER_START_AT_END=${EVE_START_AT_END:-true}
       - VIGILAN_DEBUG=${DEBUG:-false}
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       gateway:
         condition: service_started
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/api/health').raise_for_status()"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import httpx; httpx.get('http://localhost:8000/api/health').raise_for_status()",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
