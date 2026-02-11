@@ -4,10 +4,11 @@ import Header from "@/components/layout/Header";
 import SummaryCards from "@/components/dashboard/SummaryCards";
 import RecentAlerts from "@/components/dashboard/RecentAlerts";
 import TopSignatures from "@/components/dashboard/TopSignatures";
+import IPBreakdownCharts from "@/components/dashboard/IPBreakdownCharts";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import useSWR from "swr";
-import { fetchAlertStats, fetchFlowStats } from "@/lib/api";
-import type { AlertStats, FlowStats } from "@/lib/types";
+import { fetchAlertStats, fetchFlowStats, fetchIPCharts } from "@/lib/api";
+import type { AlertStats, FlowStats, IPChartsResponse } from "@/lib/types";
 
 export default function DashboardPage() {
   const { alerts, status } = useWebSocket();
@@ -19,6 +20,11 @@ export default function DashboardPage() {
     refreshInterval: 10000,
     fallbackData: undefined,
   });
+  const { data: ipCharts } = useSWR<IPChartsResponse>(
+    "ip-charts",
+    () => fetchIPCharts() as Promise<IPChartsResponse>,
+    { refreshInterval: 10000, fallbackData: undefined },
+  );
 
   return (
     <div className="min-h-screen">
@@ -29,6 +35,7 @@ export default function DashboardPage() {
           <TopSignatures topSignatures={alertStats?.top_signatures || []} />
           <RecentAlerts alerts={alerts} />
         </div>
+        <IPBreakdownCharts charts={ipCharts} />
       </div>
     </div>
   );

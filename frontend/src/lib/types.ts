@@ -118,3 +118,15 @@ export interface AlertExplanationResponse {
   explanation: string;
   sources_found: number;
 }
+
+export interface IPBreakdownChart {
+  data: Array<Record<string, string | number>>;
+  keys: string[];
+}
+
+export interface IPChartsResponse {
+  by_app_proto: IPBreakdownChart;
+  by_category: IPBreakdownChart;
+  by_event_type: IPBreakdownChart;
+  by_action: IPBreakdownChart;
+}

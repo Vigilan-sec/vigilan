@@ -8,29 +8,29 @@
 # ──────────────────────────────────────────────
 
 # DNS query (informational)
-alert dns any any -> any any (msg:"DNS Query Detected"; sid:9000001; rev:1;)
+alert dns any any -> any any (msg:"DNS Query Detected"; classtype:misc-activity; sid:9000001; rev:2;)
 
 # HTTP request (informational)
-alert http any any -> any any (msg:"HTTP Request Detected"; sid:9000002; rev:1;)
+alert http any any -> any any (msg:"HTTP Request Detected"; classtype:web-application-activity; sid:9000002; rev:2;)
 
 # ICMP ping
-alert icmp any any -> any any (msg:"ICMP Ping Detected"; itype:8; sid:9000003; rev:1;)
+alert icmp any any -> any any (msg:"ICMP Ping Detected"; itype:8; classtype:icmp-event; sid:9000003; rev:2;)
 
 # SSH connection attempt
-alert tcp any any -> any 22 (msg:"SSH Connection Attempt"; flow:to_server,established; sid:9000004; rev:1;)
+alert tcp any any -> any 22 (msg:"SSH Connection Attempt"; flow:to_server,established; classtype:network-scan; sid:9000004; rev:2;)
 
 # ──────────────────────────────────────────────
 # Blocking rules (drop / reject)
 # ──────────────────────────────────────────────
 
 # Suspicious DNS domain — reject so the client gets an immediate failure
-reject dns any any -> any any (msg:"Suspicious DNS domain"; dns.query; content:"bad.test"; nocase; sid:9000101; rev:2;)
+reject dns any any -> any any (msg:"Suspicious DNS domain"; dns.query; content:"bad.test"; nocase; classtype:bad-unknown; sid:9000101; rev:3;)
 
 # Possible DNS tunneling — drop silently
-drop dns any any -> any any (msg:"Possible DNS tunneling"; dns.query; pcre:"/[a-z0-9]{30,}\.bad\.test/i"; sid:9000102; rev:2;)
+drop dns any any -> any any (msg:"Possible DNS tunneling"; dns.query; pcre:"/[a-z0-9]{30,}\.bad\.test/i"; classtype:trojan-activity; sid:9000102; rev:3;)
 
 # HTTP C2 beacon — drop silently
-drop http any any -> any any (msg:"C2 Beacon"; http.uri; content:"/c2/beacon"; nocase; sid:9000103; rev:2;)
+drop http any any -> any any (msg:"C2 Beacon"; http.uri; content:"/c2/beacon"; nocase; classtype:trojan-activity; sid:9000103; rev:3;)
 
 # HTTP malware download — reject so the client knows it was blocked
-reject http any any -> any any (msg:"Malware Download"; http.uri; content:"/download/update.exe"; nocase; sid:9000104; rev:2;)
+reject http any any -> any any (msg:"Malware Download"; http.uri; content:"/download/update.exe"; nocase; classtype:trojan-activity; sid:9000104; rev:3;)

@@ -4,6 +4,7 @@ import type {
   FlowRecord,
   FlowStats,
   HealthStatus,
+  IPChartsResponse,
   PaginatedResponse,
   RawEvent,
   SystemStatus,
@@ -43,6 +44,13 @@ export function fetchAlertStats(): Promise<AlertStats> {
 
 export function fetchFlowStats(): Promise<FlowStats> {
   return fetchJson(`${API_BASE_URL}/flows/stats`, "Failed to fetch flow stats");
+}
+
+export function fetchIPCharts(): Promise<IPChartsResponse> {
+  return fetchJson(
+    `${API_BASE_URL}/charts/ip-breakdown`,
+    "Failed to fetch IP breakdown charts",
+  );
 }
 
 export function fetchAlerts(

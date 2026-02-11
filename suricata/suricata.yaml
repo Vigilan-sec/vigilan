@@ -67,6 +67,7 @@ pcap:
     checksum-checks: auto
 
 default-rule-path: /etc/suricata/rules
+classification-file: /etc/suricata/classification.config
 rule-files:
   - suricata.rules
   - local.rules

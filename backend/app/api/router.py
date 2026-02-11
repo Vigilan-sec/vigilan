@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.alerts import router as alerts_router
+from app.api.charts import router as charts_router
 from app.api.events import router as events_router
 from app.api.flows import router as flows_router
 from app.api.system import router as system_router
@@ -12,5 +13,6 @@ api_router.include_router(system_router)
 api_router.include_router(alerts_router, prefix="/alerts")
 api_router.include_router(flows_router, prefix="/flows")
 api_router.include_router(events_router, prefix="/events")
+api_router.include_router(charts_router, prefix="/charts")
 api_router.include_router(ws_router, prefix="/ws")
 api_router.include_router(rag_router, prefix="/rag")
