@@ -66,7 +66,7 @@ chmod +x /etc/profile.d/vigilan.sh
 
 SCENARIOS_PATH="/lab/scenarios.sh"
 if [ "${RUN_SCENARIOS:-1}" = "1" ] && [ -f "${SCENARIOS_PATH}" ]; then
-  echo "Running attacker scenarios every 5 minutes from ${SCENARIOS_PATH}"
+  echo "Running attacker scenarios every 1 minutes from ${SCENARIOS_PATH}"
   (
     while true; do
       printf "[%s] Running scenarios\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
