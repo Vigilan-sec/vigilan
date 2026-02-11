@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
 from app.services.alert_service import get_alert_by_id, get_alert_stats, get_alerts
+from app.utils.datetime import ensure_paris_fields
 
 router = APIRouter(tags=["alerts"])
 
@@ -39,6 +40,8 @@ async def list_alerts(
         sort_by=sort_by,
         sort_order=sort_order,
     )
+    for item in items:
+        ensure_paris_fields(item, ["timestamp", "ingested_at"])
     return {
         "items": items,
         "total": total,
@@ -65,4 +68,5 @@ async def get_alert(
     alert = await get_alert_by_id(session, alert_id)
     if alert is None:
         raise HTTPException(status_code=404, detail="Alert not found")
+    ensure_paris_fields(alert, ["timestamp", "ingested_at"])
     return alert

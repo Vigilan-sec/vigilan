@@ -5,12 +5,15 @@ export function formatNumber(num: number): string {
 
 export function formatTimestamp(timestamp: string): string {
   const date = new Date(timestamp);
-  return date.toLocaleString("fr-FR");
+  return date.toLocaleString("fr-FR", {
+    timeZone: "Europe/Paris",
+  });
 }
 
 export function formatFullDate(timestamp: string): string {
   const date = new Date(timestamp);
   return date.toLocaleString("fr-FR", {
+    timeZone: "Europe/Paris",
     weekday: "short",
     year: "numeric",
     month: "short",

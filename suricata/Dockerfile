@@ -11,7 +11,8 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         suricata \
-        iptables && \
+        iptables \
+        tzdata && \
     suricata-update && \
     apt-get purge -y software-properties-common gnupg2 && \
     apt-get autoremove -y && \

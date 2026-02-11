@@ -25,6 +25,7 @@ services:
       - LAN_IFACE=eth0
       - LAN2_IFACE=eth1
       - WAN_IFACE=eth2
+      - TZ=Europe/Paris
     entrypoint: ["/bin/bash", "/lab/gateway-entrypoint.sh"]
     restart: unless-stopped
 
@@ -48,6 +49,7 @@ services:
       - VIGILAN_EVE_WATCHER_START_AT_END=${EVE_START_AT_END:-true}
       - VIGILAN_DEBUG=${DEBUG:-false}
       - OLLAMA_HOST=http://host.docker.internal:11434
+      - TZ=Europe/Paris
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -81,6 +83,7 @@ services:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
       - BACKEND_URL=${BACKEND_URL:-http://backend:8000}
+      - TZ=Europe/Paris
     depends_on:
       backend:
         condition: service_healthy

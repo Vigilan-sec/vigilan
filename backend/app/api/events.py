@@ -8,6 +8,7 @@ from sqlmodel import select
 
 from app.db.session import get_session
 from app.models.database import RawEvent
+from app.utils.datetime import ensure_paris_fields
 
 router = APIRouter(tags=["events"])
 
@@ -40,6 +41,8 @@ async def list_events(
 
     result = await session.execute(query)
     items = list(result.scalars().all())
+    for item in items:
+        ensure_paris_fields(item, ["timestamp", "ingested_at"])
 
     count_result = await session.execute(count_query)
     total = count_result.scalar() or 0
