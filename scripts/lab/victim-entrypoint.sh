@@ -70,4 +70,16 @@ EOF
 chmod +x /etc/profile.d/vigilan.sh
 
 echo "Victim ready. SSH: root/root"
+
+# Launch benign traffic simulation in background
+if [ -f /lab/benign_traffic.sh ]; then
+  echo "Starting scenario traffic simulation..."
+  (
+    while true; do
+      /lab/scenario_victim.sh
+      sleep 60
+    done
+  ) >/var/log/vigilan-benign.log 2>&1 &
+fi
+
 exec /usr/sbin/sshd -D -e
