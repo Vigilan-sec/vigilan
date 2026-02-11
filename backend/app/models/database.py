@@ -28,6 +28,15 @@ class AlertRecord(SQLModel, table=True):
     rev: int = 1
     metadata_json: Optional[str] = None
 
+    # Enriched payload data from Suricata eve-log
+    payload_printable: Optional[str] = None
+    packet: Optional[str] = None
+
+    # Protocol context (http/dns/tls object serialized as JSON when present)
+    http_json: Optional[str] = None
+    dns_json: Optional[str] = None
+    tls_json: Optional[str] = None
+
     ingested_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )

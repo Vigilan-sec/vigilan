@@ -241,10 +241,18 @@ export default function AlertsTable() {
                       </span>
                     </td>
                     <td
-                      className="px-4 py-3 text-xs font-medium text-muted uppercase"
+                      className="px-4 py-3"
                       style={{ width: colWidths[7] }}
                     >
-                      {alert.action}
+                      <span
+                        className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${
+                          alert.action === "blocked"
+                            ? "bg-red-500/20 text-red-400"
+                            : "bg-green-500/20 text-green-400"
+                        }`}
+                      >
+                        {alert.action}
+                      </span>
                     </td>
                     <td className="px-4 py-3" style={{ width: colWidths[8] }}>
                       <button

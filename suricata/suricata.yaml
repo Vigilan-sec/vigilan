@@ -10,6 +10,13 @@ vars:
     SHELLCODE_PORTS: "!80"
     SSH_PORTS: "22"
 
+# Ensure drop/reject actions are evaluated before alert-only rules in IPS mode.
+action-order:
+  - pass
+  - drop
+  - reject
+  - alert
+
 default-log-dir: /var/log/suricata/
 
 outputs:
@@ -22,18 +29,33 @@ outputs:
         - alert:
             metadata: yes
             tagged-packets: yes
+            payload: yes
+            payload-printable: yes
+            packet: yes
+            http-body: yes
+            http-body-printable: yes
         - http:
             extended: yes
+            dump-all-headers: both
         - dns:
             query: yes
             answer: yes
         - tls:
             extended: yes
+            session-resumption: yes
+        - files:
+            force-magic: yes
+            force-hash:
+              - md5
+              - sha256
         - flow
-        - stats:
-            totals: yes
-            threads: no
-            deltas: no
+
+# NFQUEUE settings for IPS mode (used when Suricata runs with -q).
+nfq:
+  mode: accept
+  fail-open: yes
+  repeat-mark: 1
+  repeat-mask: 1
 
 # Use pcap on Docker Desktop; AF_PACKET is not supported reliably.
 pcap:

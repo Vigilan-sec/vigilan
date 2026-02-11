@@ -19,6 +19,12 @@ class AlertExplanationRequest(BaseModel):
     src_ip: str | None = None
     dest_ip: str | None = None
     proto: str | None = None
+    app_proto: str | None = None
+    action: str | None = None
+    payload_printable: str | None = None
+    http_context: dict | None = None
+    dns_context: dict | None = None
+    tls_context: dict | None = None
 
 
 class AlertExplanationResponse(BaseModel):
@@ -77,6 +83,12 @@ async def explain_alert(request: AlertExplanationRequest):
         "src_ip": request.src_ip,
         "dest_ip": request.dest_ip,
         "proto": request.proto,
+        "app_proto": request.app_proto,
+        "action": request.action,
+        "payload_printable": request.payload_printable,
+        "http_context": request.http_context,
+        "dns_context": request.dns_context,
+        "tls_context": request.tls_context,
     }
 
     try:

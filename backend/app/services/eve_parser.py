@@ -23,6 +23,11 @@ def eve_to_alert(event: EveEvent) -> Optional[AlertRecord]:
     if event.event_type != EventType.ALERT or event.alert is None:
         return None
 
+    # Serialize protocol context when present on alert events
+    http_json = json.dumps(event.http.model_dump(exclude_none=True)) if event.http else None
+    dns_json = json.dumps(event.dns.model_dump(exclude_none=True)) if event.dns else None
+    tls_json = json.dumps(event.tls.model_dump(exclude_none=True)) if event.tls else None
+
     return AlertRecord(
         timestamp=event.timestamp,
         flow_id=event.flow_id,
@@ -42,6 +47,11 @@ def eve_to_alert(event: EveEvent) -> Optional[AlertRecord]:
         gid=event.alert.gid,
         rev=event.alert.rev,
         metadata_json=json.dumps(event.alert.metadata) if event.alert.metadata else None,
+        payload_printable=event.payload_printable,
+        packet=event.packet,
+        http_json=http_json,
+        dns_json=dns_json,
+        tls_json=tls_json,
     )
 
 

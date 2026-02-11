@@ -17,6 +17,15 @@ interface FieldDef {
   render?: () => React.ReactNode;
 }
 
+function parseJsonField(raw: string | null): Record<string, unknown> | null {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 export default function AlertDetail({ alert }: AlertDetailProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -31,7 +40,21 @@ export default function AlertDetail({ alert }: AlertDetailProps) {
     { label: "Signature", value: alert.signature },
     { label: "Signature ID", value: alert.signature_id, mono: true },
     { label: "Category", value: alert.category },
-    { label: "Action", value: alert.action },
+    {
+      label: "Action",
+      value: null,
+      render: () => (
+        <span
+          className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${
+            alert.action === "blocked"
+              ? "bg-red-500/20 text-red-400"
+              : "bg-green-500/20 text-green-400"
+          }`}
+        >
+          {alert.action}
+        </span>
+      ),
+    },
     { label: "Source IP", value: alert.src_ip, mono: true },
     {
       label: "Source Port",
@@ -80,6 +103,10 @@ export default function AlertDetail({ alert }: AlertDetailProps) {
       parsedMetadata = alert.metadata_json;
     }
   }
+
+  const httpContext = parseJsonField(alert.http_json);
+  const dnsContext = parseJsonField(alert.dns_json);
+  const tlsContext = parseJsonField(alert.tls_json);
 
   return (
     <div className="space-y-6">
@@ -131,6 +158,68 @@ export default function AlertDetail({ alert }: AlertDetailProps) {
           ))}
         </dl>
       </div>
+
+      {/* Payload */}
+      {alert.payload_printable && (
+        <div className="rounded-lg border border-app surface-2 overflow-hidden">
+          <div className="border-b border-app px-5 py-3">
+            <h2 className="text-sm font-semibold text-strong">Payload</h2>
+          </div>
+          <pre className="overflow-x-auto p-5 text-xs font-mono text-muted leading-relaxed whitespace-pre-wrap break-all">
+            {alert.payload_printable}
+          </pre>
+        </div>
+      )}
+
+      {/* HTTP Context */}
+      {httpContext && (
+        <div className="rounded-lg border border-app surface-2 overflow-hidden">
+          <div className="border-b border-app px-5 py-3">
+            <h2 className="text-sm font-semibold text-strong">HTTP Context</h2>
+          </div>
+          <pre className="overflow-x-auto p-5 text-xs font-mono text-muted leading-relaxed">
+            {JSON.stringify(httpContext, null, 2)}
+          </pre>
+        </div>
+      )}
+
+      {/* DNS Context */}
+      {dnsContext && (
+        <div className="rounded-lg border border-app surface-2 overflow-hidden">
+          <div className="border-b border-app px-5 py-3">
+            <h2 className="text-sm font-semibold text-strong">DNS Context</h2>
+          </div>
+          <pre className="overflow-x-auto p-5 text-xs font-mono text-muted leading-relaxed">
+            {JSON.stringify(dnsContext, null, 2)}
+          </pre>
+        </div>
+      )}
+
+      {/* TLS Context */}
+      {tlsContext && (
+        <div className="rounded-lg border border-app surface-2 overflow-hidden">
+          <div className="border-b border-app px-5 py-3">
+            <h2 className="text-sm font-semibold text-strong">TLS Context</h2>
+          </div>
+          <pre className="overflow-x-auto p-5 text-xs font-mono text-muted leading-relaxed">
+            {JSON.stringify(tlsContext, null, 2)}
+          </pre>
+        </div>
+      )}
+
+      {/* Packet (base64) */}
+      {alert.packet && (
+        <div className="rounded-lg border border-app surface-2 overflow-hidden">
+          <div className="border-b border-app px-5 py-3">
+            <h2 className="text-sm font-semibold text-strong">
+              Raw Packet (base64)
+            </h2>
+          </div>
+          <pre className="overflow-x-auto p-5 text-xs font-mono text-subtle leading-relaxed whitespace-pre-wrap break-all">
+            {alert.packet}
+          </pre>
+        </div>
+      )}
 
       {/* Metadata JSON */}
       {parsedMetadata && (

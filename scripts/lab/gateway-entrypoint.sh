@@ -5,12 +5,14 @@ LAN_IFACE="${LAN_IFACE:-eth0}"
 LAN2_IFACE="${LAN2_IFACE:-eth1}"
 WAN_IFACE="${WAN_IFACE:-eth2}"
 HOME_NET="${SURICATA_HOME_NET:-[10.10.0.0/24]}"
+SURICATA_MODE="${SURICATA_MODE:-ids}"
 
 echo "=== Vigilan Lab Gateway ==="
 echo "LAN interface: ${LAN_IFACE}"
 echo "LAN2 interface: ${LAN2_IFACE}"
 echo "WAN interface: ${WAN_IFACE}"
 echo "HOME_NET: ${HOME_NET}"
+echo "Suricata mode: ${SURICATA_MODE}"
 
 sysctl -w net.ipv4.ip_forward=1 || true
 sysctl -w net.ipv4.conf.all.send_redirects=0 2>/dev/null || true
@@ -20,6 +22,16 @@ sysctl -w "net.ipv4.conf.${LAN2_IFACE}.send_redirects=0" 2>/dev/null || true
 sysctl -w "net.ipv4.conf.${WAN_IFACE}.send_redirects=0" 2>/dev/null || true
 
 iptables -P FORWARD ACCEPT
+
+if [ "${SURICATA_MODE}" = "ips" ]; then
+	# Queue forwarded traffic for Suricata IPS inspection.
+	iptables -I FORWARD -i "${LAN_IFACE}" -o "${LAN2_IFACE}" -j NFQUEUE --queue-num 0 2>/dev/null || true
+	iptables -I FORWARD -i "${LAN2_IFACE}" -o "${LAN_IFACE}" -j NFQUEUE --queue-num 0 2>/dev/null || true
+	iptables -I FORWARD -i "${LAN_IFACE}" -o "${WAN_IFACE}" -j NFQUEUE --queue-num 0 2>/dev/null || true
+	iptables -I FORWARD -i "${LAN2_IFACE}" -o "${WAN_IFACE}" -j NFQUEUE --queue-num 0 2>/dev/null || true
+	iptables -I FORWARD -i "${WAN_IFACE}" -o "${LAN_IFACE}" -j NFQUEUE --queue-num 0 2>/dev/null || true
+	iptables -I FORWARD -i "${WAN_IFACE}" -o "${LAN2_IFACE}" -j NFQUEUE --queue-num 0 2>/dev/null || true
+fi
 iptables -A FORWARD -i "${LAN_IFACE}" -o "${LAN2_IFACE}" -j ACCEPT 2>/dev/null || true
 iptables -A FORWARD -i "${LAN2_IFACE}" -o "${LAN_IFACE}" -j ACCEPT 2>/dev/null || true
 iptables -A FORWARD -i "${LAN_IFACE}" -o "${WAN_IFACE}" -j ACCEPT 2>/dev/null || true
@@ -55,4 +67,9 @@ awk -v lan="${LAN_IFACE}" -v lan2="${LAN2_IFACE}" '
 ' /etc/suricata/suricata.yaml > /etc/suricata/suricata.yaml.tmp && mv /etc/suricata/suricata.yaml.tmp /etc/suricata/suricata.yaml
 
 echo "Starting Suricata (pcap on ${LAN_IFACE}, ${LAN2_IFACE})"
-exec suricata -c /etc/suricata/suricata.yaml --pcap -v
+if [ "${SURICATA_MODE}" = "ips" ]; then
+	echo "Starting Suricata in IPS mode (NFQUEUE 0)"
+	exec suricata -c /etc/suricata/suricata.yaml -q 0 -v
+else
+	exec suricata -c /etc/suricata/suricata.yaml --pcap -v
+fi

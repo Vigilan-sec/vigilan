@@ -1,26 +1,36 @@
-# Vigilan test rules - fire on common traffic for pipeline validation
+# Vigilan local rules
+# alert = detect + log only (IDS)
+# drop   = detect + log + block silently (IPS)
+# reject = detect + log + block + send RST/ICMP unreachable (IPS)
 
-# Alert on any DNS query
+# ──────────────────────────────────────────────
+# Monitoring rules (alert only)
+# ──────────────────────────────────────────────
+
+# DNS query (informational)
 alert dns any any -> any any (msg:"DNS Query Detected"; sid:9000001; rev:1;)
 
-# Alert on any HTTP request
+# HTTP request (informational)
 alert http any any -> any any (msg:"HTTP Request Detected"; sid:9000002; rev:1;)
 
-# Alert on ICMP ping
+# ICMP ping
 alert icmp any any -> any any (msg:"ICMP Ping Detected"; itype:8; sid:9000003; rev:1;)
 
-# Alert on SSH connection
+# SSH connection attempt
 alert tcp any any -> any 22 (msg:"SSH Connection Attempt"; flow:to_server,established; sid:9000004; rev:1;)
 
-# Demo rules
-# Suspicious DNS domain
-alert dns any any -> any any (msg:"Suspicious DNS domain"; dns.query; content:"bad.test"; nocase; sid:9000101; rev:1;)
+# ──────────────────────────────────────────────
+# Blocking rules (drop / reject)
+# ──────────────────────────────────────────────
 
-# Potential DNS tunneling (long query)
-alert dns any any -> any any (msg:"Possible DNS tunneling"; dns.query; pcre:"/[a-z0-9]{30,}\.bad\.test/i"; sid:9000102; rev:1;)
+# Suspicious DNS domain — reject so the client gets an immediate failure
+reject dns any any -> any any (msg:"Suspicious DNS domain"; dns.query; content:"bad.test"; nocase; sid:9000101; rev:2;)
 
-# HTTP C2 beacon
-alert http any any -> any any (msg:"C2 Beacon"; http.uri; content:"/c2/beacon"; nocase; sid:9000103; rev:1;)
+# Possible DNS tunneling — drop silently
+drop dns any any -> any any (msg:"Possible DNS tunneling"; dns.query; pcre:"/[a-z0-9]{30,}\.bad\.test/i"; sid:9000102; rev:2;)
 
-# HTTP malware download
-alert http any any -> any any (msg:"Malware Download"; http.uri; content:"/download/update.exe"; nocase; sid:9000104; rev:1;)
+# HTTP C2 beacon — drop silently
+drop http any any -> any any (msg:"C2 Beacon"; http.uri; content:"/c2/beacon"; nocase; sid:9000103; rev:2;)
+
+# HTTP malware download — reject so the client knows it was blocked
+reject http any any -> any any (msg:"Malware Download"; http.uri; content:"/download/update.exe"; nocase; sid:9000104; rev:2;)

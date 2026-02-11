@@ -24,6 +24,12 @@ export default function ExplanationModal({
     setIsLoading(true);
     setError(null);
     try {
+      // Parse protocol context from JSON strings
+      const parseJson = (raw: string | null) => {
+        if (!raw) return undefined;
+        try { return JSON.parse(raw); } catch { return undefined; }
+      };
+
       const result = await explainAlert({
         signature: alert.signature,
         category: alert.category,
@@ -31,6 +37,12 @@ export default function ExplanationModal({
         src_ip: alert.src_ip,
         dest_ip: alert.dest_ip,
         proto: alert.proto,
+        app_proto: alert.app_proto,
+        action: alert.action,
+        payload_printable: alert.payload_printable,
+        http_context: parseJson(alert.http_json),
+        dns_context: parseJson(alert.dns_json),
+        tls_context: parseJson(alert.tls_json),
       });
       setExplanation(result);
     } catch (err) {
@@ -47,6 +59,12 @@ export default function ExplanationModal({
     alert.src_ip,
     alert.dest_ip,
     alert.proto,
+    alert.app_proto,
+    alert.action,
+    alert.payload_printable,
+    alert.http_json,
+    alert.dns_json,
+    alert.tls_json,
   ]);
 
   useEffect(() => {

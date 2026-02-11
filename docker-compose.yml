@@ -25,6 +25,7 @@ services:
       - LAN_IFACE=eth0
       - LAN2_IFACE=eth1
       - WAN_IFACE=eth2
+      - SURICATA_MODE=ips
       - TZ=Europe/Paris
     entrypoint: ["/bin/bash", "/lab/gateway-entrypoint.sh"]
     restart: unless-stopped

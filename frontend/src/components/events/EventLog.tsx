@@ -8,12 +8,10 @@ import { formatTimestamp } from "@/lib/utils";
 
 const eventTypeColors: Record<string, string> = {
   alert: "bg-red-500/20 text-red-400",
-  flow: "bg-blue-500/20 text-blue-400",
   dns: "bg-cyan-500/20 text-cyan-400",
   http: "bg-green-500/20 text-green-400",
   tls: "bg-purple-500/20 text-purple-400",
   fileinfo: "bg-orange-500/20 text-orange-400",
-  stats: "chip-muted",
   anomaly: "bg-yellow-500/20 text-yellow-400",
   ssh: "bg-indigo-500/20 text-indigo-400",
   smtp: "bg-pink-500/20 text-pink-400",

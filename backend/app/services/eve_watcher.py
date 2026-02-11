@@ -11,6 +11,9 @@ from app.models.eve_event import EventType
 
 logger = logging.getLogger(__name__)
 
+# Event types stored only in dedicated tables, not in raw_events.
+_SKIP_RAW_TYPES = {EventType.FLOW, EventType.STATS}
+
 
 class EveWatcher:
     """Watches the eve.json file for new lines (poll-based tail).
@@ -86,9 +89,11 @@ class EveWatcher:
         self.last_event_at = event.timestamp.isoformat()
 
         async with async_session() as session:
-            # Always store raw event
-            raw_record = eve_to_raw(event, raw_line)
-            session.add(raw_record)
+            # Store raw event for notable protocol events only
+            # (flows go to dedicated table, stats are noise)
+            if event.event_type not in _SKIP_RAW_TYPES:
+                raw_record = eve_to_raw(event, raw_line)
+                session.add(raw_record)
 
             # Route by event type
             if event.event_type == EventType.ALERT:
@@ -108,11 +113,13 @@ class EveWatcher:
                             "dest_ip": alert.dest_ip,
                             "dest_port": alert.dest_port,
                             "proto": alert.proto,
+                            "app_proto": alert.app_proto,
                             "action": alert.action,
                             "signature_id": alert.signature_id,
                             "signature": alert.signature,
                             "category": alert.category,
                             "severity": alert.severity,
+                            "payload_printable": alert.payload_printable,
                         },
                     })
                     return  # Already committed

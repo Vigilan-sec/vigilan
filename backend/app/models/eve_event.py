@@ -89,6 +89,11 @@ class EveEvent(BaseModel):
     community_id: Optional[str] = None
     app_proto: Optional[str] = None
 
+    # Packet payload fields (enabled via eve-log alert config)
+    payload: Optional[str] = None
+    payload_printable: Optional[str] = None
+    packet: Optional[str] = None
+
     alert: Optional[SuricataAlert] = None
     flow: Optional[SuricataFlow] = None
     http: Optional[SuricataHttp] = None

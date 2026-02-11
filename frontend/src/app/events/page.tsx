@@ -9,7 +9,7 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen">
-      <Header title="Raw Events" wsStatus={status} />
+      <Header title="Events" wsStatus={status} />
       <div className="p-6">
         <EventLog />
       </div>

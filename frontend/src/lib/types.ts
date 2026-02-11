@@ -26,6 +26,11 @@ export interface AlertRecord {
   gid: number;
   rev: number;
   metadata_json: string | null;
+  payload_printable: string | null;
+  packet: string | null;
+  http_json: string | null;
+  dns_json: string | null;
+  tls_json: string | null;
   ingested_at: string;
 }
 
@@ -101,6 +106,12 @@ export interface AlertExplanationRequest {
   src_ip?: string | null;
   dest_ip?: string | null;
   proto?: string | null;
+  app_proto?: string | null;
+  action?: string | null;
+  payload_printable?: string | null;
+  http_context?: Record<string, unknown> | null;
+  dns_context?: Record<string, unknown> | null;
+  tls_context?: Record<string, unknown> | null;
 }
 
 export interface AlertExplanationResponse {
