@@ -74,6 +74,9 @@ Protected endpoints now include:
 - new `/login` page
 - authenticated app shell
 - logout control in the header
+- admin user management page at `/admin/users`
+- network inventory page at `/network`
+- sidebar network panel for quick device monitoring
 - secure scenario dashboard at `/security`
 - status page now shows auth and transport details
 

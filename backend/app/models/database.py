@@ -91,8 +91,13 @@ class UserRecord(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     username: str = Field(index=True, unique=True)
     password_hash: str
+    full_name: Optional[str] = None
+    email: Optional[str] = None
     is_admin: bool = True
     disabled: bool = False
+    can_access_ai: bool = False
+    can_manage_ips: bool = False
+    created_by_user_id: Optional[int] = None
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )

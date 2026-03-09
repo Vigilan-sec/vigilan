@@ -3,18 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import NetworkSidebarPanel from "@/components/layout/NetworkSidebarPanel";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: "\u25A6" },
   { href: "/security", label: "Security", icon: "\u2694" },
+  { href: "/network", label: "Network", icon: "\u25C8" },
   { href: "/alerts", label: "Alerts", icon: "\u26A0" },
   { href: "/flows", label: "Flows", icon: "\u21C4" },
   { href: "/events", label: "Events", icon: "\u2630" },
   { href: "/status", label: "Status", icon: "\u2699" },
+  { href: "/admin/users", label: "Users", icon: "\u263B", adminOnly: true },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -57,7 +62,9 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => {
+        {navItems
+          .filter((item) => !item.adminOnly || user?.is_admin)
+          .map((item) => {
           const active = isActive(item.href);
           return (
             <Link
@@ -80,6 +87,8 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      <NetworkSidebarPanel collapsed={collapsed} />
 
       {/* Footer */}
       <div className="border-t border-app px-5 py-3 flex items-center gap-2">

@@ -27,7 +27,12 @@ class LoginRequest(BaseModel):
 class AuthUserResponse(BaseModel):
     id: int
     username: str
+    full_name: str | None = None
+    email: str | None = None
     is_admin: bool
+    disabled: bool
+    can_access_ai: bool
+    can_manage_ips: bool
     created_at: datetime
     last_login_at: datetime | None = None
 
@@ -41,7 +46,12 @@ def serialize_user(user: UserRecord) -> AuthUserResponse:
     return AuthUserResponse(
         id=user.id or 0,
         username=user.username,
+        full_name=user.full_name,
+        email=user.email,
         is_admin=user.is_admin,
+        disabled=user.disabled,
+        can_access_ai=user.can_access_ai,
+        can_manage_ips=user.can_manage_ips,
         created_at=user.created_at,
         last_login_at=user.last_login_at,
     )

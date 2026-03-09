@@ -2,15 +2,19 @@ import type {
   AlertRecord,
   AlertStats,
   AuthUser,
+  CreateUserPayload,
   FlowRecord,
   FlowStats,
   HealthStatus,
   IPChartsResponse,
   LoginResponse,
+  ManagedUser,
+  NetworkOverview,
   PaginatedResponse,
   RawEvent,
   SecurityOverview,
   SystemStatus,
+  UpdateUserPayload,
   AlertExplanationRequest,
   AlertExplanationResponse,
 } from "@/lib/types";
@@ -164,5 +168,36 @@ export function fetchSecurityOverview(): Promise<SecurityOverview> {
   return fetchJson(
     `${API_BASE_URL}/security/overview`,
     "Failed to fetch security overview",
+  );
+}
+
+export function fetchUsers(): Promise<ManagedUser[]> {
+  return fetchJson(`${API_BASE_URL}/users`, "Failed to fetch users");
+}
+
+export function createUser(payload: CreateUserPayload): Promise<ManagedUser> {
+  return fetchJson(`${API_BASE_URL}/users`, "Failed to create user", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateUser(userId: number, payload: UpdateUserPayload): Promise<ManagedUser> {
+  return fetchJson(`${API_BASE_URL}/users/${userId}`, "Failed to update user", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchNetworkOverview(): Promise<NetworkOverview> {
+  return fetchJson(
+    `${API_BASE_URL}/network/overview`,
+    "Failed to fetch network overview",
   );
 }

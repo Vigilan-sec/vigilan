@@ -143,7 +143,12 @@ export interface IPChartsResponse {
 export interface AuthUser {
   id: number;
   username: string;
+  full_name: string | null;
+  email: string | null;
   is_admin: boolean;
+  disabled: boolean;
+  can_access_ai: boolean;
+  can_manage_ips: boolean;
   created_at: string;
   last_login_at: string | null;
 }
@@ -184,4 +189,52 @@ export interface SecurityOverview {
   tactic_breakdown: { tactic: string; count: number }[];
   recent_hits: SecurityRecentHit[];
   top_sources: { ip: string; count: number }[];
+}
+
+export type ManagedUser = AuthUser;
+
+export interface CreateUserPayload {
+  username: string;
+  password: string;
+  full_name?: string | null;
+  email?: string | null;
+  is_admin?: boolean;
+  can_access_ai?: boolean;
+  can_manage_ips?: boolean;
+}
+
+export interface UpdateUserPayload {
+  full_name?: string | null;
+  email?: string | null;
+  is_admin?: boolean;
+  disabled?: boolean;
+  can_access_ai?: boolean;
+  can_manage_ips?: boolean;
+  new_password?: string | null;
+}
+
+export interface NetworkDevice {
+  ip: string;
+  label: string;
+  role: string;
+  segment: string;
+  kind: string;
+  details: string;
+  status: "active" | "idle" | "unseen";
+  last_seen: string | null;
+  total_flows: number;
+  total_alerts: number;
+  total_bytes: number;
+  top_protocols: string[];
+}
+
+export interface NetworkOverview {
+  summary: {
+    total_devices: number;
+    active_devices: number;
+    known_devices: number;
+    observed_devices: number;
+    last_observed_at: string | null;
+  };
+  devices: NetworkDevice[];
 }

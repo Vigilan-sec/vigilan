@@ -49,6 +49,9 @@ Acces:
 - Dashboard : http://localhost:3000
 - API docs  : http://localhost:8000/docs
 - Secure UI : https://localhost:3443
+- Login secure local : `admin` + mot de passe genere dans `backend:/data/db/default-admin-password.txt`
+- Pages principales : `/security`, `/network`
+- Administration : `/admin/users` (visible uniquement pour les comptes admin)
 
 SSH (depuis l'hote macOS):
 
@@ -65,7 +68,7 @@ Scripts et exemples de trafic:
 - Voir scripts/lab/scenarios.sh
 - Voir scripts/lab/run_attack_playbook.sh pour les scenarios cyber manuels
 - Voir docs/cyber-attack-playbook.md pour le contexte des nouvelles detections
-- Voir docs/local-auth-and-ui-security.md pour l'auth locale et l'acces HTTPS
+- Voir docs/local-auth-and-ui-security.md pour l'auth locale, la gestion des utilisateurs et l'acces HTTPS
 
 Arret:
 
