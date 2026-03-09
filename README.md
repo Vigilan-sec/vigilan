@@ -62,6 +62,8 @@ Scripts et exemples de trafic:
 
 - Voir scripts/lab/README.md
 - Voir scripts/lab/scenarios.sh
+- Voir scripts/lab/run_attack_playbook.sh pour les scenarios cyber manuels
+- Voir docs/cyber-attack-playbook.md pour le contexte des nouvelles detections
 
 Arret:
 

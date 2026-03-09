@@ -8,7 +8,8 @@ RUN apt-get update && \
       iproute2 \
       iputils-ping \
       curl \
-      dnsutils && \
+      dnsutils \
+      python3 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

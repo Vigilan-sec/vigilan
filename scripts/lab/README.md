@@ -39,6 +39,15 @@ docker exec -it attacker bash
 
 See scripts/lab/scenarios.sh for example commands.
 
+For richer cyber demos, you can also run the manual playbook from the repository root:
+
+```bash
+bash scripts/lab/run_attack_playbook.sh ssh-burst
+bash scripts/lab/run_attack_playbook.sh all
+```
+
+Full context and the detection mapping are documented in `docs/cyber-attack-playbook.md`.
+
 ## Stop
 
 ```

@@ -69,6 +69,25 @@ printf "\033[0m\n"
 EOF
 chmod +x /etc/profile.d/vigilan.sh
 
+mkdir -p /srv/http
+cat > /srv/http/index.html << 'EOF'
+<html>
+  <head><title>Vigilan Victim</title></head>
+  <body>
+    <h1>Vigilan victim web service</h1>
+    <p>This lightweight service exists so attacker-to-victim HTTP probes cross the gateway.</p>
+  </body>
+</html>
+EOF
+
+if command -v python3 >/dev/null 2>&1; then
+  echo "Starting victim demo web service on port 80"
+  (
+    cd /srv/http
+    python3 -m http.server 80
+  ) >/var/log/vigilan-http.log 2>&1 &
+fi
+
 echo "Victim ready. SSH: root/root"
 
 # Launch benign traffic simulation in background

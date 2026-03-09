@@ -34,3 +34,23 @@ drop http any any -> any any (msg:"C2 Beacon"; http.uri; content:"/c2/beacon"; n
 
 # HTTP malware download — reject so the client knows it was blocked
 reject http any any -> any any (msg:"Malware Download"; http.uri; content:"/download/update.exe"; nocase; classtype:trojan-activity; sid:9000104; rev:3;)
+
+# ──────────────────────────────────────────────
+# Advanced demo scenarios (manual playbook)
+# ──────────────────────────────────────────────
+
+# Burst of repeated SSH handshakes from one source in a short window
+alert tcp any any -> $HOME_NET 22 (msg:"Possible SSH brute-force burst"; flow:to_server,established; detection_filter:track by_src,count 5,seconds 60; classtype:attempted-admin; sid:9000105; rev:1;)
+
+# Simple SQL injection probes sent to the malicious web server
+alert http $HOME_NET any -> any any (msg:"SQL Injection Probe"; flow:to_server,established; http.uri.raw; content:"UNION-SELECT"; nocase; classtype:web-application-attack; sid:9000106; rev:1;)
+alert http $HOME_NET any -> any any (msg:"SQL Injection Authentication Bypass Probe"; flow:to_server,established; http.uri.raw; content:"username=admin%27+OR+%271%27%3D%271"; nocase; classtype:web-application-attack; sid:9000107; rev:1;)
+
+# Command injection style payloads in query parameters
+alert http $HOME_NET any -> any any (msg:"Command Injection Probe"; flow:to_server,established; http.uri.raw; content:"cmd="; nocase; content:"/etc/passwd"; nocase; distance:0; within:128; classtype:web-application-attack; sid:9000108; rev:2;)
+
+# Multiple long subdomains carrying chunked data to a suspicious zone
+alert dns $HOME_NET any -> any any (msg:"Possible DNS Exfiltration Burst"; dns.query; content:".chunk"; nocase; content:".exfil.lab"; nocase; distance:0; within:32; detection_filter:track by_src,count 3,seconds 30; classtype:trojan-activity; sid:9000109; rev:4;)
+
+# A reverse shell demo often shows up as an outbound callback to a high-risk port
+alert tcp $HOME_NET any -> $HOME_NET 4444 (msg:"Potential Reverse Shell Callback"; flow:to_server,established; classtype:trojan-activity; sid:9000110; rev:1;)
