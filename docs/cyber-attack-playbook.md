@@ -19,8 +19,11 @@ The goal was to stay close to a real LAN monitoring demo while avoiding expensiv
 1. **SSH brute-force burst**
 2. **SQL injection probe**
 3. **Command injection probe**
-4. **DNS exfiltration burst**
-5. **Reverse shell callback simulation**
+4. **Web login spray**
+5. **Directory traversal probe**
+6. **Recon tool user-agent**
+7. **DNS exfiltration burst**
+8. **Reverse shell callback simulation**
 
 They are all visible at network level, easy to explain in class, and safe to replay in Docker.
 
@@ -31,6 +34,9 @@ They are all visible at network level, easy to explain in class, and safe to rep
 | SSH brute-force burst | Rapid repeated access attempts to a management service | Multiple SSH handshakes to port 22 in a short window | `9000105` |
 | SQL injection probe | App-layer exploitation attempts over HTTP | Suspicious URI patterns such as `UNION-SELECT` or auth bypass payloads | `9000106`, `9000107` |
 | Command injection probe | Remote command execution attempts through web parameters | Query strings containing `cmd=` / `exec=` plus command markers | `9000108` |
+| Web login spray | Repeated credential guesses against a web login surface | Burst of `/login.php` requests from the same source | `9000111` |
+| Directory traversal probe | Attempts to read sensitive files through a web path | `../` patterns combined with `/etc/passwd` | `9000112` |
+| Recon tool user-agent | Scanner tooling identifying itself in HTTP metadata | `sqlmap` in the HTTP user-agent | `9000113` |
 | DNS exfiltration burst | Small chunks of encoded data sent over DNS | Repeated long labels ending in `.exfil.lab` | `9000109` |
 | Reverse shell callback simulation | A compromised host calling back to an operator port | Victim-originated connection to TCP/4444 | `9000110` |
 
@@ -48,6 +54,9 @@ Then run a single scenario from the repository root:
 bash scripts/lab/run_attack_playbook.sh ssh-burst
 bash scripts/lab/run_attack_playbook.sh sqli
 bash scripts/lab/run_attack_playbook.sh cmdi
+bash scripts/lab/run_attack_playbook.sh login-spray
+bash scripts/lab/run_attack_playbook.sh traversal
+bash scripts/lab/run_attack_playbook.sh recon-ua
 bash scripts/lab/run_attack_playbook.sh dns-exfil
 bash scripts/lab/run_attack_playbook.sh reverse-shell
 ```
@@ -83,7 +92,19 @@ The command-injection traffic uses obvious markers like `cmd=` and `/etc/passwd`
 
 The script base64-encodes a demo string, splits it into chunks, and sends the chunks as DNS labels under `.exfil.lab`. This gives a concrete example of data theft through a protocol that often looks harmless.
 
-### 5. Reverse shell callback simulation
+### 5. Web login spray
+
+This scenario highlights credential spraying behavior against a web login endpoint. The victim web service does not need a real login feature because the IDS lesson is the burst pattern itself.
+
+### 6. Directory traversal probe
+
+This probe demonstrates how an attacker might try to pull a sensitive file such as `/etc/passwd` through a vulnerable file-download or path handler.
+
+### 7. Recon tool user-agent
+
+Many real tools are noisy and leak their identity. Using a `sqlmap` user-agent makes the detection easy to explain during a demo while staying safe and reproducible.
+
+### 8. Reverse shell callback simulation
 
 This is a lightweight callback demo, not a full interactive shell. The victim opens a TCP connection to the attacker listener on port `4444` and sends a few host details. That keeps the scenario safe while still generating the traffic pattern an IDS would care about.
 

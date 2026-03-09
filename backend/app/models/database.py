@@ -83,3 +83,33 @@ class RawEvent(SQLModel, table=True):
     ingested_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
+
+
+class UserRecord(SQLModel, table=True):
+    __tablename__ = "users"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    username: str = Field(index=True, unique=True)
+    password_hash: str
+    is_admin: bool = True
+    disabled: bool = False
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+    last_login_at: Optional[datetime] = None
+    password_changed_at: Optional[datetime] = None
+
+
+class AuthSessionRecord(SQLModel, table=True):
+    __tablename__ = "auth_sessions"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="users.id")
+    token_hash: str = Field(index=True)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+    expires_at: datetime = Field(index=True)
+    last_seen_at: Optional[datetime] = None
+    user_agent: Optional[str] = None
+    client_ip: Optional[str] = None

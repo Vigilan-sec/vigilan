@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/layout/Sidebar";
+import { AuthProvider } from "@/components/auth/AuthProvider";
+import AppShell from "@/components/layout/AppShell";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -23,12 +24,9 @@ export default function RootLayout({
       <body
         className={`${geistMono.variable} font-mono antialiased app-body`}
       >
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <main className="flex-1" style={{ marginLeft: "var(--sidebar-width)" }}>
-            {children}
-          </main>
-        </div>
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
       </body>
     </html>
   );

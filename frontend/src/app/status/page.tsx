@@ -5,9 +5,11 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import useSWR from "swr";
 import { fetchStatus, fetchHealth } from "@/lib/api";
 import type { SystemStatus } from "@/lib/types";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export default function StatusPage() {
   const { status: wsStatus } = useWebSocket();
+  const { user } = useAuth();
   const { data: sysStatus } = useSWR<SystemStatus>("status", fetchStatus, {
     refreshInterval: 5000,
   });
@@ -91,6 +93,42 @@ export default function StatusPage() {
               <span className="text-green-400">
                 {sysStatus?.database.status || "--"}
               </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="surface-2 border border-app rounded-lg p-6">
+          <h2 className="text-lg font-semibold mb-4">Authentication</h2>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="text-muted">Current user</div>
+            <div className="font-mono">{user?.username || "--"}</div>
+            <div className="text-muted">Secure cookie</div>
+            <div>
+              {sysStatus?.auth.secure_cookie ? (
+                <span className="text-green-400">Enabled</span>
+              ) : (
+                <span className="text-red-400">Disabled</span>
+              )}
+            </div>
+            <div className="text-muted">Session TTL</div>
+            <div className="font-mono">
+              {sysStatus?.auth.session_ttl_hours || "--"}h
+            </div>
+            <div className="text-muted">Known users</div>
+            <div className="font-mono">{sysStatus?.auth.user_count || "--"}</div>
+          </div>
+        </div>
+
+        <div className="surface-2 border border-app rounded-lg p-6">
+          <h2 className="text-lg font-semibold mb-4">Transport</h2>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="text-muted">Recommended secure UI</div>
+            <div className="font-mono text-xs">
+              {sysStatus?.transport.secure_ui_origin || "--"}
+            </div>
+            <div className="text-muted">Browser protocol</div>
+            <div className="font-mono">
+              {typeof window !== "undefined" ? window.location.protocol : "--"}
             </div>
           </div>
         </div>

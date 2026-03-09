@@ -1,27 +1,63 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import type { AlertRecord } from "@/lib/types";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/ws/alerts";
 const MAX_BUFFER = 500;
 const RECONNECT_DELAYS = [1000, 2000, 4000, 8000, 15000, 30000];
 
 export type WsStatus = "connecting" | "connected" | "disconnected";
 
+function resolveWsUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  if (process.env.NEXT_PUBLIC_WS_URL) return process.env.NEXT_PUBLIC_WS_URL;
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  return `${protocol}//${window.location.host}/api/ws/alerts`;
+}
+
 export function useWebSocket() {
+  const { user } = useAuth();
   const [alerts, setAlerts] = useState<AlertRecord[]>([]);
   const [status, setStatus] = useState<WsStatus>("disconnected");
   const wsRef = useRef<WebSocket | null>(null);
   const retriesRef = useRef(0);
   const mountedRef = useRef(true);
-  const connectRef = useRef<() => void>(() => {});
+  const reconnectTimeoutRef = useRef<number | null>(null);
 
-  const connect = useCallback(() => {
-    if (!mountedRef.current) return;
-    setStatus("connecting");
+  useEffect(() => {
+    mountedRef.current = true;
 
-    const ws = new WebSocket(WS_URL);
+    if (!user) {
+      const resetTimeout = window.setTimeout(() => {
+        if (!mountedRef.current) return;
+        setAlerts([]);
+        setStatus("disconnected");
+      }, 0);
+      return () => {
+        window.clearTimeout(resetTimeout);
+        mountedRef.current = false;
+        if (reconnectTimeoutRef.current !== null) {
+          window.clearTimeout(reconnectTimeoutRef.current);
+        }
+        wsRef.current?.close();
+      };
+    }
+
+    const wsUrl = resolveWsUrl();
+    if (!wsUrl) {
+      return () => {
+        mountedRef.current = false;
+      };
+    }
+
+    const connectingTimeout = window.setTimeout(() => {
+      if (mountedRef.current) {
+        setStatus("connecting");
+      }
+    }, 0);
+
+    const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -50,26 +86,35 @@ export function useWebSocket() {
       setStatus("disconnected");
       const delay = RECONNECT_DELAYS[Math.min(retriesRef.current, RECONNECT_DELAYS.length - 1)];
       retriesRef.current++;
-      setTimeout(() => connectRef.current(), delay);
+      reconnectTimeoutRef.current = window.setTimeout(() => {
+        if (!mountedRef.current) return;
+        wsRef.current?.close();
+        const retrySocket = new WebSocket(wsUrl);
+        wsRef.current = retrySocket;
+        setStatus("connecting");
+
+        retrySocket.onopen = ws.onopen;
+        retrySocket.onmessage = ws.onmessage;
+        retrySocket.onclose = ws.onclose;
+        retrySocket.onerror = ws.onerror;
+      }, delay);
     };
 
     ws.onerror = () => {
       ws.close();
     };
-  }, []);
 
-  useEffect(() => {
-    mountedRef.current = true;
-    connectRef.current = connect;
-    const connectTimeout = setTimeout(() => connectRef.current(), 0);
     return () => {
-      clearTimeout(connectTimeout);
+      window.clearTimeout(connectingTimeout);
       mountedRef.current = false;
+      if (reconnectTimeoutRef.current !== null) {
+        window.clearTimeout(reconnectTimeoutRef.current);
+      }
       wsRef.current?.close();
     };
-  }, [connect]);
+  }, [user]);
 
-  const clearAlerts = useCallback(() => setAlerts([]), []);
+  const clearAlerts = () => setAlerts([]);
 
   return { alerts, status, clearAlerts };
 }

@@ -1,19 +1,30 @@
 import type {
   AlertRecord,
   AlertStats,
+  AuthUser,
   FlowRecord,
   FlowStats,
   HealthStatus,
   IPChartsResponse,
+  LoginResponse,
   PaginatedResponse,
   RawEvent,
+  SecurityOverview,
   SystemStatus,
   AlertExplanationRequest,
   AlertExplanationResponse,
 } from "@/lib/types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
 
 type QueryParams = Record<string, string | number | boolean | undefined | null>;
 
@@ -29,9 +40,34 @@ function buildQuery(params?: QueryParams): string {
   return `?${search.toString()}`;
 }
 
-async function fetchJson<T>(url: string, errorMessage: string): Promise<T> {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(errorMessage);
+async function fetchJson<T>(
+  url: string,
+  errorMessage: string,
+  init?: RequestInit,
+): Promise<T> {
+  const response = await fetch(url, {
+    cache: "no-store",
+    credentials: "include",
+    ...init,
+    headers: {
+      Accept: "application/json",
+      ...(init?.headers || {}),
+    },
+  });
+  if (!response.ok) {
+    let detail = errorMessage;
+    try {
+      const payload = (await response.json()) as { detail?: string };
+      detail = payload.detail || errorMessage;
+    } catch {
+      // keep default message
+    }
+    throw new ApiError(detail, response.status);
+  }
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    return undefined as T;
+  }
   return response.json() as Promise<T>;
 }
 
@@ -92,18 +128,41 @@ export function fetchHealth(): Promise<HealthStatus> {
 export async function explainAlert(
   request: AlertExplanationRequest,
 ): Promise<AlertExplanationResponse> {
-  const response = await fetch(`${API_BASE_URL}/rag/explain-alert`, {
+  return fetchJson(`${API_BASE_URL}/rag/explain-alert`, "Failed to explain alert", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(request),
   });
-  if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ detail: "Failed to explain alert" }));
-    throw new Error(error.detail || "Failed to explain alert");
-  }
-  return response.json() as Promise<AlertExplanationResponse>;
+}
+
+export function fetchCurrentUser(): Promise<AuthUser> {
+  return fetchJson(`${API_BASE_URL}/auth/me`, "Failed to fetch current user");
+}
+
+export function login(payload: {
+  username: string;
+  password: string;
+}): Promise<LoginResponse> {
+  return fetchJson(`${API_BASE_URL}/auth/login`, "Failed to sign in", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function logout(): Promise<{ ok: boolean }> {
+  return fetchJson(`${API_BASE_URL}/auth/logout`, "Failed to sign out", {
+    method: "POST",
+  });
+}
+
+export function fetchSecurityOverview(): Promise<SecurityOverview> {
+  return fetchJson(
+    `${API_BASE_URL}/security/overview`,
+    "Failed to fetch security overview",
+  );
 }

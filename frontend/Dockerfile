@@ -14,7 +14,7 @@ COPY . .
 RUN mkdir -p /app/public
 
 # Build-time env vars (baked into the JS bundle for client-side use)
-ARG NEXT_PUBLIC_WS_URL=ws://localhost:8000/api/ws/alerts
+ARG NEXT_PUBLIC_WS_URL=
 ENV NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
 
 # Backend URL for Next.js rewrites (used by the standalone server).

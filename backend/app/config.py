@@ -1,4 +1,6 @@
 from pathlib import Path
+from typing import Literal
+
 from pydantic_settings import BaseSettings
 
 
@@ -16,9 +18,24 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "sqlite+aiosqlite:///./vigilan.db"
     raw_events_max_rows: int = 10000
+    secure_ui_origin: str = "https://localhost:3443"
+
+    # Authentication
+    auth_cookie_name: str = "vigilan_session"
+    auth_cookie_secure: bool = True
+    auth_cookie_samesite: Literal["strict", "lax", "none"] = "strict"
+    auth_session_ttl_hours: int = 12
+    auth_password_iterations: int = 600000
+    auth_default_admin_username: str = "admin"
+    auth_default_admin_password: str | None = None
+    auth_default_admin_password_path: Path = Path("/data/db/default-admin-password.txt")
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "https://localhost:3443",
+    ]
 
     model_config = {"env_prefix": "VIGILAN_", "env_file": ".env"}
 

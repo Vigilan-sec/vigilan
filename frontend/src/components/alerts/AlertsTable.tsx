@@ -17,6 +17,7 @@ export default function AlertsTable() {
   const [searchInput, setSearchInput] = useState("");
   const [selectedAlert, setSelectedAlert] = useState<AlertRecord | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const [colWidths, setColWidths] = useState<number[]>([
     70, 170, 110, 280, 170, 170, 90, 100, 100,
   ]);
@@ -41,7 +42,7 @@ export default function AlertsTable() {
     const handleMouseUp = () => {
       if (!resizeState.current) return;
       resizeState.current = null;
-      document.body.style.cursor = "";
+      setIsResizing(false);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -52,6 +53,13 @@ export default function AlertsTable() {
     };
   }, []);
 
+  useEffect(() => {
+    document.body.style.cursor = isResizing ? "col-resize" : "";
+    return () => {
+      document.body.style.cursor = "";
+    };
+  }, [isResizing]);
+
   const handleResizeStart = (index: number, event: React.MouseEvent) => {
     event.preventDefault();
     resizeState.current = {
@@ -59,7 +67,7 @@ export default function AlertsTable() {
       startX: event.clientX,
       startWidth: colWidths[index],
     };
-    document.body.style.cursor = "col-resize";
+    setIsResizing(true);
   };
 
   const params: Record<string, string> = { page: String(page), per_page: "25" };

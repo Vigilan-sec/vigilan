@@ -92,6 +92,15 @@ export interface SystemStatus {
   database: {
     status: string;
   };
+  auth: {
+    current_user: string;
+    secure_cookie: boolean;
+    session_ttl_hours: number;
+    user_count: number;
+  };
+  transport: {
+    secure_ui_origin: string;
+  };
 }
 
 export interface HealthStatus {
@@ -129,4 +138,50 @@ export interface IPChartsResponse {
   by_category: IPBreakdownChart;
   by_event_type: IPBreakdownChart;
   by_action: IPBreakdownChart;
+}
+
+export interface AuthUser {
+  id: number;
+  username: string;
+  is_admin: boolean;
+  created_at: string;
+  last_login_at: string | null;
+}
+
+export interface LoginResponse {
+  user: AuthUser;
+  expires_at: string;
+}
+
+export interface SecurityScenario {
+  key: string;
+  title: string;
+  tactic: string;
+  technique: string;
+  severity: string;
+  description: string;
+  signature_ids: number[];
+  total_alerts: number;
+  last_seen: string | null;
+  last_signature: string | null;
+  status: "active" | "quiet";
+}
+
+export interface SecurityRecentHit {
+  id: number;
+  timestamp: string;
+  signature: string;
+  signature_id: number;
+  src_ip: string;
+  dest_ip: string;
+  dest_port: number | null;
+  action: string;
+  severity: number;
+}
+
+export interface SecurityOverview {
+  scenarios: SecurityScenario[];
+  tactic_breakdown: { tactic: string; count: number }[];
+  recent_hits: SecurityRecentHit[];
+  top_sources: { ip: string; count: number }[];
 }

@@ -15,6 +15,9 @@ Scenarios:
   ssh-burst
   sqli
   cmdi
+  login-spray
+  traversal
+  recon-ua
   dns-exfil
   reverse-shell
   all
@@ -72,7 +75,7 @@ require_running_container "${ATTACKER_CONTAINER}"
 require_running_container "${VICTIM_CONTAINER}"
 
 case "${SCENARIO}" in
-  ssh-burst|sqli|cmdi|dns-exfil)
+  ssh-burst|sqli|cmdi|login-spray|traversal|recon-ua|dns-exfil)
     attacker_exec "/lab/advanced_scenarios.sh ${SCENARIO}"
     ;;
   reverse-shell)

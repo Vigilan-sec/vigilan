@@ -8,6 +8,7 @@ import { formatTimestamp, protocolColor, formatBytes, formatNumber } from "@/lib
 
 export default function FlowsTable() {
   const [page, setPage] = useState(1);
+  const [isResizing, setIsResizing] = useState(false);
   const [colWidths, setColWidths] = useState<number[]>([
     170, 90, 180, 180, 120, 120, 90, 90, 90, 90,
   ]);
@@ -32,7 +33,7 @@ export default function FlowsTable() {
     const handleMouseUp = () => {
       if (!resizeState.current) return;
       resizeState.current = null;
-      document.body.style.cursor = "";
+      setIsResizing(false);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -43,6 +44,13 @@ export default function FlowsTable() {
     };
   }, []);
 
+  useEffect(() => {
+    document.body.style.cursor = isResizing ? "col-resize" : "";
+    return () => {
+      document.body.style.cursor = "";
+    };
+  }, [isResizing]);
+
   const handleResizeStart = (index: number, event: React.MouseEvent) => {
     event.preventDefault();
     resizeState.current = {
@@ -50,7 +58,7 @@ export default function FlowsTable() {
       startX: event.clientX,
       startWidth: colWidths[index],
     };
-    document.body.style.cursor = "col-resize";
+    setIsResizing(true);
   };
 
   const params: Record<string, string> = {

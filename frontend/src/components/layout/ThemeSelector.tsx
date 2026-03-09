@@ -17,7 +17,7 @@ export default function ThemeSelector() {
   useEffect(() => {
     const saved = window.localStorage.getItem(storageKey);
     const initial = saved && themes.some((t) => t.value === saved) ? saved : "mocha";
-    setTheme(initial);
+    window.setTimeout(() => setTheme(initial), 0);
     document.documentElement.dataset.theme = initial;
   }, []);
 

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: "\u25A6" },
+  { href: "/security", label: "Security", icon: "\u2694" },
   { href: "/alerts", label: "Alerts", icon: "\u26A0" },
   { href: "/flows", label: "Flows", icon: "\u21C4" },
   { href: "/events", label: "Events", icon: "\u2630" },
@@ -19,7 +20,7 @@ export default function Sidebar() {
   useEffect(() => {
     const saved = window.localStorage.getItem("vigilan-sidebar");
     const next = saved === "collapsed";
-    setCollapsed(next);
+    window.setTimeout(() => setCollapsed(next), 0);
     document.documentElement.dataset.sidebar = next ? "collapsed" : "expanded";
   }, []);
 
@@ -49,7 +50,7 @@ export default function Sidebar() {
             Vigilan IDS
           </h1>
           <p className="text-[10px] text-subtle font-medium sidebar-subtitle">
-            Intrusion Detection
+            Secure local SOC
           </p>
         </div>
       </div>

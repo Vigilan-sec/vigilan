@@ -54,3 +54,12 @@ alert dns $HOME_NET any -> any any (msg:"Possible DNS Exfiltration Burst"; dns.q
 
 # A reverse shell demo often shows up as an outbound callback to a high-risk port
 alert tcp $HOME_NET any -> $HOME_NET 4444 (msg:"Potential Reverse Shell Callback"; flow:to_server,established; classtype:trojan-activity; sid:9000110; rev:1;)
+
+# Repeated web login attempts in a short window
+alert http $HOME_NET any -> $HOME_NET 80 (msg:"Possible Web Login Spray"; flow:to_server,established; http.uri.raw; content:"/login.php"; nocase; detection_filter:track by_src,count 5,seconds 60; classtype:attempted-admin; sid:9000111; rev:1;)
+
+# Obvious path traversal probes targeting sensitive files
+alert http $HOME_NET any -> $HOME_NET 80 (msg:"Directory Traversal Probe"; flow:to_server,established; http.uri.raw; content:"../"; nocase; content:"/etc/passwd"; nocase; distance:0; within:64; classtype:web-application-attack; sid:9000112; rev:1;)
+
+# Scanner tooling often leaks itself through the User-Agent string
+alert http $HOME_NET any -> $HOME_NET 80 (msg:"Suspicious Recon Tool User-Agent"; flow:to_server,established; http.user_agent; content:"sqlmap"; nocase; classtype:web-application-attack; sid:9000113; rev:1;)

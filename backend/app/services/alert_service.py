@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import func, desc
+from sqlalchemy import desc, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
@@ -14,6 +14,7 @@ async def get_alerts(
     per_page: int = 50,
     severity: Optional[int] = None,
     category: Optional[str] = None,
+    search: Optional[str] = None,
     src_ip: Optional[str] = None,
     dest_ip: Optional[str] = None,
     signature: Optional[str] = None,
@@ -33,6 +34,15 @@ async def get_alerts(
     if category:
         query = query.where(AlertRecord.category == category)
         count_query = count_query.where(AlertRecord.category == category)
+    if search:
+        search_clause = or_(
+            AlertRecord.signature.contains(search),
+            AlertRecord.category.contains(search),
+            AlertRecord.src_ip.contains(search),
+            AlertRecord.dest_ip.contains(search),
+        )
+        query = query.where(search_clause)
+        count_query = count_query.where(search_clause)
     if src_ip:
         query = query.where(AlertRecord.src_ip == src_ip)
         count_query = count_query.where(AlertRecord.src_ip == src_ip)
