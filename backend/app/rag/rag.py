@@ -135,14 +135,16 @@ def generate_alert_explanation(
     proto_context_str = "\n".join(proto_context_parts) if proto_context_parts else "N/A"
 
     prompt_text = """
-You are a cybersecurity expert assistant. A security alert has been triggered by Suricata IDS/IPS and you need to explain it and provide protection recommendations.
+You are a cybersecurity assistant explaining a network security alert to a non-technical user. Use plain, everyday language. Avoid jargon, acronyms, and technical terms whenever possible. When a technical term is unavoidable, explain it in parentheses.
+
+A security alert was triggered on the network. Here are the details:
 
 ALERT DETAILS:
-- Signature: {signature}
+- Alert name: {signature}
 - Category: {category}
 - Severity: {severity}
 - Action taken: {action}
-- Source: {src_ip} -> Destination: {dest_ip}
+- From: {src_ip} -> To: {dest_ip}
 - Protocol: {proto} (App: {app_proto})
 
 PAYLOAD (printable):
@@ -151,17 +153,21 @@ PAYLOAD (printable):
 PROTOCOL CONTEXT:
 {proto_context_str}
 
-CONTEXT FROM SECURITY DOCUMENTATION:
+REFERENCE DOCUMENTATION:
 {content_text}
 
-Based on the alert details, payload, protocol context, and the provided security documentation, please:
-1) Explain what this alert means and what attack or suspicious activity it detected
-2) Analyze the payload and protocol context to provide specific insights
-3) Assess the potential risk and impact
-4) Provide specific recommendations on how to protect against or mitigate this threat
-5) Suggest any additional security measures that should be taken
+Please answer in this exact structure:
 
-If the provided documentation doesn't contain relevant information, use your cybersecurity knowledge to provide a helpful explanation.
+1) **What happened?**
+   In 2-3 simple sentences, explain what this alert means as if you were talking to someone who does not work in IT. Use an analogy if it helps.
+
+2) **How dangerous is this?**
+   Rate the risk as Low, Medium, High, or Critical and explain in one sentence why.
+
+3) **What should I do?**
+   Give 2-4 concrete, actionable steps the user or their IT team can take right now. Keep each step to one sentence. No generic advice like "stay vigilant" — only specific actions.
+
+Keep the entire response short (under 250 words). Do not repeat the alert details back. Do not use bullet points outside the structure above.
 
 Response:
 """
