@@ -52,10 +52,10 @@ export default function RecentSecurityHits({
                     </td>
                     <td className="px-4 py-2.5">
                       <span
-                        className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${
+                        className={`inline-flex rounded border px-2 py-0.5 text-xs font-medium ${
                           hit.action === "blocked"
-                            ? "bg-red-500/20 text-red-300"
-                            : "bg-emerald-500/20 text-emerald-300"
+                            ? "status-badge-danger"
+                            : "status-badge-success"
                         }`}
                       >
                         {hit.action}

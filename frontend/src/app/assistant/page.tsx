@@ -22,6 +22,11 @@ import type {
 import { formatTimestamp } from "@/lib/utils";
 
 const RECENT_ALERT_LIMIT = 20;
+const QUICK_PROMPTS = [
+  "Summarize the main attack patterns you see.",
+  "Which alerts should I investigate first and why?",
+  "What containment steps would you recommend right now?",
+];
 
 interface ChatMessage extends AssistantChatMessage {
   id: string;
@@ -243,6 +248,22 @@ export default function AssistantPage() {
                 Analyzing the latest alerts with {getAiProviderLabel(provider)}...
               </div>
             )}
+
+            <section className="max-w-3xl rounded-xl border border-app surface-1 p-4">
+              <h2 className="text-sm font-semibold text-strong">Quick prompts</h2>
+              <div className="mt-3 flex flex-col gap-2 text-sm">
+                {QUICK_PROMPTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => setQuestion(prompt)}
+                    className="rounded-lg border border-app px-3 py-2 text-left text-subtle transition-colors hover-surface-3 hover:text-strong"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </section>
           </div>
 
           <div className="border-t border-app px-5 py-4">
@@ -275,7 +296,7 @@ export default function AssistantPage() {
                 <button
                   type="submit"
                   disabled={isLoadingReply || !question.trim()}
-                  className="rounded-md border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-200 transition-colors hover:bg-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="btn-primary rounded-md border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Send
                 </button>
@@ -333,25 +354,6 @@ export default function AssistantPage() {
             </div>
           </section>
 
-          <section className="rounded-xl border border-app surface-2 p-5">
-            <h2 className="text-sm font-semibold text-strong">Quick prompts</h2>
-            <div className="mt-3 flex flex-col gap-2 text-sm">
-              {[
-                "Summarize the main attack patterns you see.",
-                "Which alerts should I investigate first and why?",
-                "What containment steps would you recommend right now?",
-              ].map((prompt) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  onClick={() => setQuestion(prompt)}
-                  className="rounded-lg border border-app px-3 py-2 text-left text-subtle transition-colors hover-surface-3 hover:text-strong"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
-          </section>
         </aside>
       </div>
     </div>

@@ -21,6 +21,16 @@
   --accent: #a6e3a1;
   --accent-soft: rgba(166, 227, 161, 0.18);
   --accent-border: rgba(166, 227, 161, 0.38);
+  --primary-text: #bfdbfe;
+  --primary-soft: rgba(59, 130, 246, 0.16);
+  --primary-soft-hover: rgba(59, 130, 246, 0.24);
+  --primary-border: rgba(59, 130, 246, 0.3);
+  --success-text: #86efac;
+  --success-soft: rgba(16, 185, 129, 0.16);
+  --success-border: rgba(16, 185, 129, 0.28);
+  --danger-text: #fca5a5;
+  --danger-soft: rgba(239, 68, 68, 0.16);
+  --danger-border: rgba(239, 68, 68, 0.28);
 }
 
 [data-sidebar="collapsed"] {
@@ -66,6 +76,16 @@
   --accent: #a6da95;
   --accent-soft: rgba(166, 218, 149, 0.18);
   --accent-border: rgba(166, 218, 149, 0.38);
+  --primary-text: #bfdbfe;
+  --primary-soft: rgba(59, 130, 246, 0.16);
+  --primary-soft-hover: rgba(59, 130, 246, 0.24);
+  --primary-border: rgba(59, 130, 246, 0.3);
+  --success-text: #86efac;
+  --success-soft: rgba(16, 185, 129, 0.16);
+  --success-border: rgba(16, 185, 129, 0.28);
+  --danger-text: #fca5a5;
+  --danger-soft: rgba(239, 68, 68, 0.16);
+  --danger-border: rgba(239, 68, 68, 0.28);
 }
 
 [data-theme="frappe"] {
@@ -80,6 +100,16 @@
   --accent: #a6d189;
   --accent-soft: rgba(166, 209, 137, 0.18);
   --accent-border: rgba(166, 209, 137, 0.38);
+  --primary-text: #bfdbfe;
+  --primary-soft: rgba(59, 130, 246, 0.16);
+  --primary-soft-hover: rgba(59, 130, 246, 0.24);
+  --primary-border: rgba(59, 130, 246, 0.3);
+  --success-text: #86efac;
+  --success-soft: rgba(16, 185, 129, 0.16);
+  --success-border: rgba(16, 185, 129, 0.28);
+  --danger-text: #fca5a5;
+  --danger-soft: rgba(239, 68, 68, 0.16);
+  --danger-border: rgba(239, 68, 68, 0.28);
 }
 
 [data-theme="latte"] {
@@ -94,6 +124,16 @@
   --accent: #40a02b;
   --accent-soft: rgba(64, 160, 43, 0.22);
   --accent-border: rgba(64, 160, 43, 0.45);
+  --primary-text: #1d4ed8;
+  --primary-soft: rgba(59, 130, 246, 0.12);
+  --primary-soft-hover: rgba(59, 130, 246, 0.18);
+  --primary-border: rgba(37, 99, 235, 0.28);
+  --success-text: #166534;
+  --success-soft: rgba(34, 197, 94, 0.12);
+  --success-border: rgba(22, 101, 52, 0.22);
+  --danger-text: #b91c1c;
+  --danger-soft: rgba(239, 68, 68, 0.12);
+  --danger-border: rgba(185, 28, 28, 0.22);
 }
 
 body {
@@ -184,6 +224,28 @@ body {
 
 .btn-base:hover {
   background-color: var(--surface-2);
+}
+
+.btn-primary {
+  background-color: var(--primary-soft);
+  border-color: var(--primary-border);
+  color: var(--primary-text);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-soft-hover);
+}
+
+.status-badge-success {
+  background-color: var(--success-soft);
+  border-color: var(--success-border);
+  color: var(--success-text);
+}
+
+.status-badge-danger {
+  background-color: var(--danger-soft);
+  border-color: var(--danger-border);
+  color: var(--danger-text);
 }
 
 /* Scrollbar styling */

@@ -7,11 +7,11 @@ import { formatNumber, formatTimestamp } from "@/lib/utils";
 function severityClasses(severity: string): string {
   switch (severity) {
     case "high":
-      return "border-red-500/30 bg-red-500/10 text-red-200";
+      return "border-red-500/30 bg-red-500/10";
     case "medium":
-      return "border-amber-500/30 bg-amber-500/10 text-amber-200";
+      return "border-amber-500/30 bg-amber-500/10";
     default:
-      return "border-sky-500/30 bg-sky-500/10 text-sky-200";
+      return "border-sky-500/30 bg-sky-500/10";
   }
 }
 
@@ -55,40 +55,40 @@ export default function ScenarioGrid({
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] opacity-80">
+                <p className="text-xs uppercase tracking-[0.2em] text-muted">
                   {scenario.tactic}
                 </p>
-                <h3 className="mt-2 text-sm font-semibold text-white/95">
+                <h3 className="mt-2 text-sm font-semibold text-strong">
                   {scenario.title}
                 </h3>
               </div>
-              <span className="rounded-full border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide">
+              <span className="rounded-full border border-app px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted">
                 {scenario.technique}
               </span>
             </div>
-            <p className="mt-3 text-xs leading-5 text-white/80">
+            <p className="mt-3 text-xs leading-5 text-muted">
               {scenario.description}
             </p>
             <div className="mt-4 flex items-end justify-between gap-3">
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-white/60">
+                <p className="text-[10px] uppercase tracking-wide text-subtle">
                   Alerts
                 </p>
-                <p className="mt-1 font-mono text-2xl font-bold">
+                <p className="mt-1 font-mono text-2xl font-bold text-strong">
                   {formatNumber(scenario.total_alerts)}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] uppercase tracking-wide text-white/60">
+                <p className="text-[10px] uppercase tracking-wide text-subtle">
                   Last seen
                 </p>
-                <p className="mt-1 text-xs text-white/80">
+                <p className="mt-1 text-xs text-muted">
                   {scenario.last_seen ? formatTimestamp(scenario.last_seen) : "Quiet"}
                 </p>
               </div>
             </div>
             {scenario.last_signature && (
-              <p className="mt-3 truncate text-[11px] text-white/70">
+              <p className="mt-3 truncate text-[11px] text-subtle">
                 Latest: {scenario.last_signature}
               </p>
             )}
