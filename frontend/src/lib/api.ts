@@ -2,6 +2,8 @@ import type {
   AlertRecord,
   AlertStats,
   AuthUser,
+  AssistantChatRequest,
+  AssistantChatResponse,
   CreateUserPayload,
   FlowRecord,
   FlowStats,
@@ -139,6 +141,22 @@ export async function explainAlert(
     },
     body: JSON.stringify(request),
   });
+}
+
+export async function chatWithAssistant(
+  request: AssistantChatRequest,
+): Promise<AssistantChatResponse> {
+  return fetchJson(
+    `${API_BASE_URL}/rag/assistant-chat`,
+    "Failed to contact assistant",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    },
+  );
 }
 
 export function fetchCurrentUser(): Promise<AuthUser> {

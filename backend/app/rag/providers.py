@@ -59,8 +59,12 @@ def _extract_nim_text(payload: dict) -> str:
     raise ProviderConfigurationError("NVIDIA NIM returned an empty response")
 
 
-def _invoke_nim(prompt: str) -> LLMInvocationResult:
-    if not settings.nim_api_key:
+def _invoke_nim(
+    prompt: str,
+    api_key_override: str | None = None,
+) -> LLMInvocationResult:
+    api_key = (api_key_override or "").strip() or settings.nim_api_key
+    if not api_key:
         raise ProviderConfigurationError(
             "Kimi via NVIDIA NIM is not configured. Set VIGILAN_NIM_API_KEY in your environment."
         )
@@ -68,7 +72,7 @@ def _invoke_nim(prompt: str) -> LLMInvocationResult:
     response = httpx.post(
         f"{settings.nim_base_url.rstrip('/')}/chat/completions",
         headers={
-            "Authorization": f"Bearer {settings.nim_api_key}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         },
         json={
@@ -97,8 +101,12 @@ def _invoke_ollama(prompt: str) -> LLMInvocationResult:
     )
 
 
-def invoke_llm(prompt: str, provider: str | None = None) -> LLMInvocationResult:
+def invoke_llm(
+    prompt: str,
+    provider: str | None = None,
+    api_key_override: str | None = None,
+) -> LLMInvocationResult:
     selected_provider = resolve_provider_name(provider)
     if selected_provider == "nim":
-        return _invoke_nim(prompt)
+        return _invoke_nim(prompt, api_key_override=api_key_override)
     return _invoke_ollama(prompt)

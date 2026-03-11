@@ -124,6 +124,7 @@ export interface AlertExplanationRequest {
   dns_context?: Record<string, unknown> | null;
   tls_context?: Record<string, unknown> | null;
   provider?: AiProvider | null;
+  kimi_api_key?: string | null;
 }
 
 export interface AlertExplanationResponse {
@@ -131,6 +132,25 @@ export interface AlertExplanationResponse {
   sources_found: number;
   provider: AiProvider;
   model: string;
+}
+
+export interface AssistantChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface AssistantChatRequest {
+  messages: AssistantChatMessage[];
+  provider?: AiProvider | null;
+  kimi_api_key?: string | null;
+  recent_alerts_limit?: number;
+}
+
+export interface AssistantChatResponse {
+  message: string;
+  provider: AiProvider;
+  model: string;
+  alert_count: number;
 }
 
 export interface IPBreakdownChart {

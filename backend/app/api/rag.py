@@ -1,13 +1,17 @@
 import logging
-from pathlib import Path
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 from typing import Literal
 
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.session import get_session
 from app.rag.embeddings import get_embedding_model
-from app.rag.vector_store import load_vector_store, search_vector_store
-from app.rag.rag import generate_alert_explanation
 from app.rag.providers import ProviderConfigurationError, resolve_provider_name
+from app.rag.rag import generate_alert_assistant_response, generate_alert_explanation
+from app.rag.vector_store import search_vector_store
+from app.services.alert_service import get_alerts
+from app.utils.datetime import ensure_paris_fields
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +32,7 @@ class AlertExplanationRequest(BaseModel):
     dns_context: dict | None = None
     tls_context: dict | None = None
     provider: Literal["ollama", "nim"] | None = None
+    kimi_api_key: str | None = None
 
 
 class AlertExplanationResponse(BaseModel):
@@ -35,6 +40,25 @@ class AlertExplanationResponse(BaseModel):
     sources_found: int
     provider: Literal["ollama", "nim"]
     model: str
+
+
+class AssistantChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class AssistantChatRequest(BaseModel):
+    messages: list[AssistantChatMessage] = Field(default_factory=list)
+    provider: Literal["ollama", "nim"] | None = None
+    kimi_api_key: str | None = None
+    recent_alerts_limit: int = 20
+
+
+class AssistantChatResponse(BaseModel):
+    message: str
+    provider: Literal["ollama", "nim"]
+    model: str
+    alert_count: int
 
 
 # Global variables for RAG system (lazy loaded)
@@ -130,6 +154,7 @@ async def explain_alert(request: AlertExplanationRequest):
             alert_data,
             relevant_docs,
             provider=selected_provider,
+            api_key_override=request.kimi_api_key,
         )
 
         return AlertExplanationResponse(
@@ -154,4 +179,61 @@ async def explain_alert(request: AlertExplanationRequest):
         else:
             detail = f"Failed to generate alert explanation: {str(e)}"
 
+        raise HTTPException(status_code=503, detail=detail)
+
+
+@router.post("/assistant-chat", response_model=AssistantChatResponse)
+async def assistant_chat(
+    request: AssistantChatRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    try:
+        selected_provider = resolve_provider_name(request.provider)
+        recent_alerts_limit = min(max(request.recent_alerts_limit, 1), 50)
+        alerts, _ = await get_alerts(
+            session,
+            page=1,
+            per_page=recent_alerts_limit,
+            sort_by="timestamp",
+            sort_order="desc",
+        )
+        for alert in alerts:
+            ensure_paris_fields(alert, ["timestamp", "ingested_at"])
+
+        alert_context = [
+            {
+                "id": alert.id,
+                "timestamp": alert.timestamp.isoformat()
+                if hasattr(alert.timestamp, "isoformat")
+                else str(alert.timestamp),
+                "signature": alert.signature,
+                "category": alert.category,
+                "severity": alert.severity,
+                "action": alert.action,
+                "src_ip": alert.src_ip,
+                "src_port": alert.src_port,
+                "dest_ip": alert.dest_ip,
+                "dest_port": alert.dest_port,
+                "proto": alert.proto,
+                "app_proto": alert.app_proto,
+            }
+            for alert in alerts
+        ]
+        response = generate_alert_assistant_response(
+            messages=[message.model_dump() for message in request.messages],
+            recent_alerts=alert_context,
+            provider=selected_provider,
+            api_key_override=request.kimi_api_key,
+        )
+        return AssistantChatResponse(
+            message=response.text,
+            provider=response.provider,
+            model=response.model,
+            alert_count=len(alert_context),
+        )
+    except ProviderConfigurationError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        logger.exception(f"Error generating assistant response: {e}")
+        detail = f"Failed to generate assistant response: {str(e)}"
         raise HTTPException(status_code=503, detail=detail)

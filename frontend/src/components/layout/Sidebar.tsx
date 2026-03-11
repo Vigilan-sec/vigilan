@@ -11,9 +11,11 @@ const navItems = [
   { href: "/security", label: "Security", icon: "\u2694" },
   { href: "/network", label: "Network", icon: "\u25C8" },
   { href: "/alerts", label: "Alerts", icon: "\u26A0" },
+  { href: "/assistant", label: "Assistant", icon: "\u25C9" },
   { href: "/flows", label: "Flows", icon: "\u21C4" },
   { href: "/events", label: "Events", icon: "\u2630" },
-  { href: "/status", label: "Status", icon: "\u2699" },
+  { href: "/settings", label: "Settings", icon: "\u2699" },
+  { href: "/status", label: "Status", icon: "\u23FA" },
   { href: "/admin/users", label: "Users", icon: "\u263B", adminOnly: true },
 ];
 

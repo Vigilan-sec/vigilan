@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { explainAlert } from "@/lib/api";
+import MarkdownContent from "@/components/shared/MarkdownContent";
 import {
   getAiProviderLabel,
   useAiProviderPreference,
 } from "@/hooks/useAiProviderPreference";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import type {
   AiProvider,
   AlertRecord,
@@ -24,6 +26,7 @@ export default function ExplanationModal({
   onClose,
 }: ExplanationModalProps) {
   const { provider, setProvider } = useAiProviderPreference();
+  const { kimiApiKey } = useAppSettings();
   const [explanation, setExplanation] =
     useState<AlertExplanationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +35,11 @@ export default function ExplanationModal({
   const fetchExplanation = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    if (provider === "nim" && !kimiApiKey.trim()) {
+      setIsLoading(false);
+      setError("Kimi is selected, but no API key is configured in Settings.");
+      return;
+    }
     try {
       // Parse protocol context from JSON strings
       const parseJson = (raw: string | null) => {
@@ -57,6 +65,7 @@ export default function ExplanationModal({
         dns_context: parseJson(alert.dns_json),
         tls_context: parseJson(alert.tls_json),
         provider,
+        kimi_api_key: provider === "nim" ? kimiApiKey.trim() : null,
       });
       setExplanation(result);
     } catch (err) {
@@ -80,6 +89,7 @@ export default function ExplanationModal({
     alert.dns_json,
     alert.tls_json,
     provider,
+    kimiApiKey,
   ]);
 
   useEffect(() => {
@@ -179,7 +189,8 @@ export default function ExplanationModal({
               </div>
               <p className="max-w-md text-xs text-gray-500 dark:text-gray-400">
                 This choice is stored for the current browser session only.
-                Ollama stays available even if Kimi is configured.
+                If you use Kimi, add the API key from Settings. Ollama stays
+                available even if Kimi is configured.
               </p>
             </div>
           </div>
@@ -239,9 +250,10 @@ export default function ExplanationModal({
                 </span>
               </div>
               <div className="prose dark:prose-invert max-w-none">
-                <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 leading-relaxed">
-                  {explanation.explanation}
-                </div>
+                <MarkdownContent
+                  content={explanation.explanation}
+                  className="text-gray-800 dark:text-gray-200"
+                />
               </div>
 
               {explanation.sources_found > 0 && (

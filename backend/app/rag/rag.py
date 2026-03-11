@@ -13,6 +13,7 @@ def generate_response(
     query: str,
     relevant_docs: list,
     provider: str | None = None,
+    api_key_override: str | None = None,
 ) -> LLMInvocationResult:
     """
     Generate a response using an LLM based on the query and relevant documents.
@@ -51,7 +52,11 @@ Answer:
     formatted_prompt = prompt.format(content_text=content_text, query=query)
 
     try:
-        response = invoke_llm(formatted_prompt, provider=provider)
+        response = invoke_llm(
+            formatted_prompt,
+            provider=provider,
+            api_key_override=api_key_override,
+        )
     except Exception as e:
         logger.error(f"LLM generation failed: {e}")
         fallback_provider = provider or "ollama"
@@ -79,6 +84,7 @@ def generate_alert_explanation(
     alert_data: dict,
     relevant_docs: list,
     provider: str | None = None,
+    api_key_override: str | None = None,
 ) -> LLMInvocationResult:
     """
     Generate an explanation and mitigation advice for a security alert.
@@ -188,7 +194,11 @@ Response:
     )
 
     try:
-        response = invoke_llm(formatted_prompt, provider=provider)
+        response = invoke_llm(
+            formatted_prompt,
+            provider=provider,
+            api_key_override=api_key_override,
+        )
     except Exception as e:
         logger.error(f"LLM generation failed: {e}")
         fallback_provider = provider or "ollama"
@@ -203,6 +213,93 @@ Response:
         )
 
     return response
+
+
+def _format_recent_alerts_for_prompt(recent_alerts: Iterable[dict]) -> str:
+    rows: list[str] = []
+    for index, alert in enumerate(recent_alerts, start=1):
+        rows.append(
+            (
+                f"{index}. time={alert.get('timestamp', 'unknown')}; "
+                f"signature={alert.get('signature', 'unknown')}; "
+                f"category={alert.get('category', 'unknown')}; "
+                f"severity={alert.get('severity', 'unknown')}; "
+                f"action={alert.get('action', 'unknown')}; "
+                f"src={alert.get('src_ip', 'unknown')}:{alert.get('src_port') or '-'}; "
+                f"dest={alert.get('dest_ip', 'unknown')}:{alert.get('dest_port') or '-'}; "
+                f"proto={alert.get('proto') or 'unknown'}; "
+                f"app_proto={alert.get('app_proto') or 'n/a'}"
+            )
+        )
+    return "\n".join(rows) if rows else "No recent alerts are available."
+
+
+def _format_conversation_for_prompt(messages: Iterable[dict]) -> str:
+    transcript: list[str] = []
+    for message in messages:
+        role = str(message.get("role", "user")).strip().lower()
+        speaker = "User" if role == "user" else "Assistant"
+        content = str(message.get("content", "")).strip()
+        if content:
+            transcript.append(f"{speaker}: {content}")
+    return "\n".join(transcript) if transcript else "No previous conversation."
+
+
+def generate_alert_assistant_response(
+    messages: list[dict],
+    recent_alerts: Iterable[dict],
+    provider: str | None = None,
+    api_key_override: str | None = None,
+) -> LLMInvocationResult:
+    prompt_text = """
+You are Vigilan Assistant, a cybersecurity copilot for analysts and operators.
+
+You must answer using the RECENT ALERTS and CONVERSATION sections below. You may add short, practical cybersecurity advice based on those alerts, but do not invent facts that are not supported by the alert list. If the user asks for something that cannot be confirmed from the alerts, say so clearly and explain what additional data would help.
+
+Style requirements:
+- Be concise, useful, and action-oriented.
+- Prefer plain language over jargon.
+- When there are no alerts, say that the platform has no recent alerts to recap.
+
+If the conversation is empty, produce a short recap with this structure:
+1. **Current situation**
+2. **Main alerts to review**
+3. **Recommended actions**
+4. **Questions you can ask me**
+
+RECENT ALERTS:
+{alerts_text}
+
+CONVERSATION:
+{conversation_text}
+
+Answer:
+"""
+
+    prompt = ChatPromptTemplate.from_template(prompt_text)
+    formatted_prompt = prompt.format(
+        alerts_text=_format_recent_alerts_for_prompt(recent_alerts),
+        conversation_text=_format_conversation_for_prompt(messages),
+    )
+
+    try:
+        return invoke_llm(
+            formatted_prompt,
+            provider=provider,
+            api_key_override=api_key_override,
+        )
+    except Exception as e:
+        logger.error(f"Assistant generation failed: {e}")
+        fallback_provider = provider or "ollama"
+        return LLMInvocationResult(
+            text="Error generating assistant response.",
+            provider=(
+                fallback_provider
+                if fallback_provider in {"ollama", "nim"}
+                else "ollama"
+            ),
+            model="unknown",
+        )
 
 
 def run_rag_pipeline(query: str, embeddings, persist_dir: str) -> dict:
