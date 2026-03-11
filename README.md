@@ -78,97 +78,100 @@ docker compose down
 
 ## Configuration LLM/RAG (optionnel)
 
-Le système inclut une fonctionnalité RAG (Retrieval-Augmented Generation) pour générer des explications automatiques des alertes de sécurité.
+Le systeme inclut une fonctionnalite RAG (Retrieval-Augmented Generation) pour generer des explications automatiques des alertes de securite.
 
-### Providers supportés
+### Providers supportes
 
-- `Ollama` pour un usage local
-- `Kimi via NVIDIA NIM` pour un usage via API distante
+| Provider | Type | Description |
+|----------|------|-------------|
+| **Ollama** | Local | LLM local, aucune cle API requise |
+| **Kimi via NVIDIA NIM** | API distante | Modele Kimi K2 heberge sur NVIDIA NIM, necessite une cle API |
 
 Le choix du provider se fait dans la modale d'explication d'alerte du dashboard.
-Ce choix est mémorisé uniquement pour la session navigateur courante.
+Ce choix est memorise uniquement pour la session navigateur courante.
 
-### Prérequis Ollama
+### Configuration
+
+1. **Copier le fichier d'environnement**
+
+   ```bash
+   cp .env.docker.example .env.docker
+   ```
+
+2. **Editer `.env.docker`** avec vos parametres (voir les sections ci-dessous).
+
+Le fichier `.env.docker` est charge automatiquement par le service `backend` dans `docker-compose.yml` via `env_file`.
+
+### Ollama (LLM local)
 
 1. **Installer Ollama**
-   - Windows/Mac : Télécharger depuis [ollama.com](https://ollama.com/download)
+   - Windows/Mac : Telecharger depuis [ollama.com](https://ollama.com/download)
    - Linux :
      ```bash
      curl -fsSL https://ollama.com/install.sh | sh
      ```
 
-2. **Installer les modèles requis**
+2. **Installer les modeles requis**
 
    ```bash
-   # Modèle LLM pour la génération de texte
+   # Modele LLM pour la generation de texte
    ollama pull mistral:latest
 
-   # Modèle d'embeddings pour la recherche sémantique
+   # Modele d'embeddings pour la recherche semantique
    ollama pull mxbai-embed-large
    ```
 
-3. **Vérifier l'installation**
+3. **Verifier l'installation**
 
    ```bash
    ollama list
    # Doit afficher mistral:latest et mxbai-embed-large
    ```
 
-4. **Démarrer Ollama** (si non démarré automatiquement)
+4. **Demarrer Ollama** (si non demarre automatiquement)
    ```bash
-   # Le service écoute par défaut sur http://localhost:11434
    ollama serve
+   # Ecoute par defaut sur http://localhost:11434
    ```
 
-### Variables d'environnement
-
-Par défaut, le backend se connecte à Ollama sur `http://localhost:11434`.
+Variables dans `.env.docker` :
 
 ```bash
-# Dans .env ou .env.docker
 VIGILAN_LLM_PROVIDER_DEFAULT=ollama
-VIGILAN_OLLAMA_HOST=http://localhost:11434
+VIGILAN_OLLAMA_HOST=http://host.docker.internal:11434
 VIGILAN_OLLAMA_MODEL=mistral:latest
 VIGILAN_EMBEDDING_MODEL=mxbai-embed-large
 ```
 
-Pour activer Kimi via NVIDIA NIM en gardant Ollama disponible :
+> **Note Docker :** Le backend tourne dans un container et accede a Ollama sur l'hote
+> via `host.docker.internal`. En mode dev local, utiliser `http://localhost:11434`.
+
+### Kimi via NVIDIA NIM (API distante)
+
+1. Creer un compte sur [build.nvidia.com](https://build.nvidia.com/)
+2. Generer une cle API (commence par `nvapi-`)
+3. Renseigner la cle dans `.env.docker` :
 
 ```bash
-# Dans .env ou .env.docker
 VIGILAN_NIM_BASE_URL=https://integrate.api.nvidia.com/v1
 VIGILAN_NIM_MODEL=moonshotai/kimi-k2-instruct
-VIGILAN_NIM_API_KEY=nvapi-...
+VIGILAN_NIM_API_KEY=nvapi-votre-cle-ici
 VIGILAN_NIM_TIMEOUT_SECONDS=60
 ```
 
-Note Docker Compose :
+Les deux providers peuvent etre configures en meme temps. Le choix se fait dans l'interface.
 
-- `docker compose up` lit automatiquement `.env`
-- pour utiliser `.env.docker`, il faut lancer `docker compose --env-file .env.docker ...`
-
-### Relancer après modification
-
-Si tu utilises `.env.docker` pour les nouveaux providers, relance comme ceci depuis la racine du projet :
+### Relancer apres modification
 
 ```bash
-docker compose down
-docker compose --env-file .env.docker build backend frontend
-docker compose --env-file .env.docker up -d --force-recreate --remove-orphans
-docker compose --env-file .env.docker ps
+docker compose up -d backend
 ```
 
-Si tu veux relancer tout le lab complet avec les nouvelles variables :
+Le backend relit `.env.docker` a chaque redemarrage, pas besoin de rebuild.
 
-```bash
-docker compose --env-file .env.docker down
-docker compose --env-file .env.docker up -d --build --force-recreate --remove-orphans
-docker compose --env-file .env.docker ps
-```
+### Base de connaissances RAG (optionnel)
 
-### Initialiser la base de connaissances (optionnel)
-
-Pour améliorer les explications avec vos propres documents PDF :
+Pour ameliorer les explications avec vos propres documents PDF :
 
 ```bash
 # 1. Placer vos documents PDF dans data/pdf/
@@ -176,24 +179,30 @@ cd backend
 
 # 2. Initialiser le vector store
 python scripts/init_vector_store.py
-
-# Note: ChromaDB peut avoir des problèmes de compatibilité entre versions.
-# Le système fonctionne sans vector store en utilisant les connaissances générales du LLM.
 ```
+
+> **Note :** ChromaDB peut avoir des problemes de compatibilite entre versions.
+> Le systeme fonctionne sans vector store en utilisant les connaissances generales du LLM.
 
 ### Utilisation
 
-Une fois le provider configuré, l'API `/api/rag/explain-alert` est disponible pour générer des explications contextuelles des alertes.
+Une fois le provider configure, l'API `/api/rag/explain-alert` est disponible.
 
-Interface frontend :
+Depuis le dashboard :
 
-- ouvrir une alerte depuis le dashboard
-- choisir `Ollama` ou `Kimi via NVIDIA NIM`
-- lancer l'explication depuis la modale
+1. Ouvrir une alerte
+2. Choisir le provider (`Ollama` ou `Kimi via NVIDIA NIM`)
+3. Lancer l'explication depuis la modale
 
-Depannage rapide:
+### Depannage
 
 ```bash
+# Verifier les logs backend pour les erreurs LLM
+docker compose logs backend --tail 50
+
+# Tester la connexion Ollama depuis le container
+docker exec backend python -c "import httpx; print(httpx.get('http://host.docker.internal:11434/api/tags').status_code)"
+
 # Connexion refusee au debut: attendre la fin de l'installation dans la victime
 docker logs victim --tail 200
 
@@ -252,7 +261,7 @@ vigilan/
 | ---------- | ----------------------------- |
 | IDS Engine | Suricata (container Docker)   |
 | Backend    | FastAPI + SQLAlchemy + SQLite |
-| Frontend   | Next.js 15 + Tailwind CSS     |
+| Frontend   | Next.js 16 + Tailwind CSS     |
 | Temps réel | WebSocket                     |
 | Infra      | Docker Compose                |
 
