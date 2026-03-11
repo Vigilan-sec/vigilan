@@ -108,6 +108,8 @@ export interface HealthStatus {
   version: string;
 }
 
+export type AiProvider = "ollama" | "nim";
+
 export interface AlertExplanationRequest {
   signature: string;
   category?: string | null;
@@ -121,11 +123,14 @@ export interface AlertExplanationRequest {
   http_context?: Record<string, unknown> | null;
   dns_context?: Record<string, unknown> | null;
   tls_context?: Record<string, unknown> | null;
+  provider?: AiProvider | null;
 }
 
 export interface AlertExplanationResponse {
   explanation: string;
   sources_found: number;
+  provider: AiProvider;
+  model: string;
 }
 
 export interface IPBreakdownChart {

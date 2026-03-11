@@ -47,7 +47,7 @@ docker network prune
 Acces:
 
 - Dashboard : http://localhost:3000
-- API docs  : http://localhost:8000/docs
+- API docs : http://localhost:8000/docs
 - Secure UI : https://localhost:3443
 - Login secure local : `admin` + mot de passe genere dans `backend:/data/db/default-admin-password.txt`
 - Pages principales : `/security`, `/network`
@@ -80,71 +80,13 @@ docker compose down
 
 Le système inclut une fonctionnalité RAG (Retrieval-Augmented Generation) pour générer des explications automatiques des alertes de sécurité.
 
-### Prérequis Ollama
+### Providers supportés
 
-1. **Installer Ollama**
-   - Windows/Mac : Télécharger depuis [ollama.com](https://ollama.com/download)
-   - Linux :
-     ```bash
-     curl -fsSL https://ollama.com/install.sh | sh
-     ```
+- `Ollama` pour un usage local
+- `Kimi via NVIDIA NIM` pour un usage via API distante
 
-2. **Installer les modèles requis**
-
-   ```bash
-   # Modèle LLM pour la génération de texte
-   ollama pull mistral:latest
-
-   # Modèle d'embeddings pour la recherche sémantique
-   ollama pull mxbai-embed-large
-   ```
-
-3. **Vérifier l'installation**
-
-   ```bash
-   ollama list
-   # Doit afficher mistral:latest et mxbai-embed-large
-   ```
-
-4. **Démarrer Ollama** (si non démarré automatiquement)
-   ```bash
-   # Le service écoute par défaut sur http://localhost:11434
-   ollama serve
-   ```
-
-### Configuration de l'environnement
-
-Par défaut, le backend se connecte à Ollama sur `http://localhost:11434`. Pour modifier :
-
-```bash
-# Dans .env
-OLLAMA_HOST=http://localhost:11434
-```
-
-### Initialiser la base de connaissances (optionnel)
-
-Pour améliorer les explications avec vos propres documents PDF :
-
-```bash
-# 1. Placer vos documents PDF dans data/pdf/
-cd backend
-
-# 2. Initialiser le vector store
-python scripts/init_vector_store.py
-
-# Note: ChromaDB peut avoir des problèmes de compatibilité entre versions.
-# Le système fonctionne sans vector store en utilisant les connaissances générales du LLM.
-```
-
-### Utilisation
-
-Une fois Ollama configuré et les modèles téléchargés, l'API `/api/rag/explain-alert` sera disponible pour générer des explications contextuelles des alertes.
-
-Interface frontend : cliquer sur une alerte dans le dashboard pour voir l'explication générée par l'IA.
-
-## Configuration LLM/RAG (optionnel)
-
-Le système inclut une fonctionnalité RAG (Retrieval-Augmented Generation) pour générer des explications automatiques des alertes de sécurité.
+Le choix du provider se fait dans la modale d'explication d'alerte du dashboard.
+Ce choix est mémorisé uniquement pour la session navigateur courante.
 
 ### Prérequis Ollama
 
@@ -178,13 +120,50 @@ Le système inclut une fonctionnalité RAG (Retrieval-Augmented Generation) pour
    ollama serve
    ```
 
-### Configuration de l'environnement
+### Variables d'environnement
 
-Par défaut, le backend se connecte à Ollama sur `http://localhost:11434`. Pour modifier :
+Par défaut, le backend se connecte à Ollama sur `http://localhost:11434`.
 
 ```bash
-# Dans .env
-OLLAMA_HOST=http://localhost:11434
+# Dans .env ou .env.docker
+VIGILAN_LLM_PROVIDER_DEFAULT=ollama
+VIGILAN_OLLAMA_HOST=http://localhost:11434
+VIGILAN_OLLAMA_MODEL=mistral:latest
+VIGILAN_EMBEDDING_MODEL=mxbai-embed-large
+```
+
+Pour activer Kimi via NVIDIA NIM en gardant Ollama disponible :
+
+```bash
+# Dans .env ou .env.docker
+VIGILAN_NIM_BASE_URL=https://integrate.api.nvidia.com/v1
+VIGILAN_NIM_MODEL=moonshotai/kimi-k2-instruct
+VIGILAN_NIM_API_KEY=nvapi-...
+VIGILAN_NIM_TIMEOUT_SECONDS=60
+```
+
+Note Docker Compose :
+
+- `docker compose up` lit automatiquement `.env`
+- pour utiliser `.env.docker`, il faut lancer `docker compose --env-file .env.docker ...`
+
+### Relancer après modification
+
+Si tu utilises `.env.docker` pour les nouveaux providers, relance comme ceci depuis la racine du projet :
+
+```bash
+docker compose down
+docker compose --env-file .env.docker build backend frontend
+docker compose --env-file .env.docker up -d --force-recreate --remove-orphans
+docker compose --env-file .env.docker ps
+```
+
+Si tu veux relancer tout le lab complet avec les nouvelles variables :
+
+```bash
+docker compose --env-file .env.docker down
+docker compose --env-file .env.docker up -d --build --force-recreate --remove-orphans
+docker compose --env-file .env.docker ps
 ```
 
 ### Initialiser la base de connaissances (optionnel)
@@ -204,9 +183,13 @@ python scripts/init_vector_store.py
 
 ### Utilisation
 
-Une fois Ollama configuré et les modèles téléchargés, l'API `/api/rag/explain-alert` sera disponible pour générer des explications contextuelles des alertes.
+Une fois le provider configuré, l'API `/api/rag/explain-alert` est disponible pour générer des explications contextuelles des alertes.
 
-Interface frontend : cliquer sur une alerte dans le dashboard pour voir l'explication générée par l'IA.
+Interface frontend :
+
+- ouvrir une alerte depuis le dashboard
+- choisir `Ollama` ou `Kimi via NVIDIA NIM`
+- lancer l'explication depuis la modale
 
 Depannage rapide:
 
@@ -265,13 +248,13 @@ vigilan/
 
 ## Stack
 
-| Composant   | Technologie                   |
-| ----------- | ----------------------------- |
-| IDS Engine  | Suricata (container Docker)   |
-| Backend     | FastAPI + SQLAlchemy + SQLite |
-| Frontend    | Next.js 15 + Tailwind CSS     |
+| Composant  | Technologie                   |
+| ---------- | ----------------------------- |
+| IDS Engine | Suricata (container Docker)   |
+| Backend    | FastAPI + SQLAlchemy + SQLite |
+| Frontend   | Next.js 15 + Tailwind CSS     |
 | Temps réel | WebSocket                     |
-| Infra       | Docker Compose                |
+| Infra      | Docker Compose                |
 
 ## API
 

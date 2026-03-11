@@ -1,5 +1,6 @@
-import os
 from langchain_ollama import OllamaEmbeddings as _RealOllamaEmbeddings
+
+from app.config import settings
 
 
 # wrapper so tests importing `OllamaEmbeddings` from
@@ -27,6 +28,5 @@ def get_embedding_model(model_name="mxbai-embed-large") -> OllamaEmbeddings:
     Returns:
         OllamaEmbeddings: An instance of the OllamaEmbeddings model.
     """
-    # Get Ollama host from environment variable
-    ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-    return OllamaEmbeddings(model=model_name, base_url=ollama_host)
+    resolved_model_name = model_name or settings.embedding_model
+    return OllamaEmbeddings(model=resolved_model_name, base_url=settings.ollama_host)

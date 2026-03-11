@@ -2,7 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { explainAlert } from "@/lib/api";
-import type { AlertRecord, AlertExplanationResponse } from "@/lib/types";
+import {
+  getAiProviderLabel,
+  useAiProviderPreference,
+} from "@/hooks/useAiProviderPreference";
+import type {
+  AiProvider,
+  AlertRecord,
+  AlertExplanationResponse,
+} from "@/lib/types";
 
 interface ExplanationModalProps {
   alert: AlertRecord;
@@ -15,6 +23,7 @@ export default function ExplanationModal({
   isOpen,
   onClose,
 }: ExplanationModalProps) {
+  const { provider, setProvider } = useAiProviderPreference();
   const [explanation, setExplanation] =
     useState<AlertExplanationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +36,11 @@ export default function ExplanationModal({
       // Parse protocol context from JSON strings
       const parseJson = (raw: string | null) => {
         if (!raw) return undefined;
-        try { return JSON.parse(raw); } catch { return undefined; }
+        try {
+          return JSON.parse(raw);
+        } catch {
+          return undefined;
+        }
       };
 
       const result = await explainAlert({
@@ -43,6 +56,7 @@ export default function ExplanationModal({
         http_context: parseJson(alert.http_json),
         dns_context: parseJson(alert.dns_json),
         tls_context: parseJson(alert.tls_json),
+        provider,
       });
       setExplanation(result);
     } catch (err) {
@@ -65,6 +79,7 @@ export default function ExplanationModal({
     alert.http_json,
     alert.dns_json,
     alert.tls_json,
+    provider,
   ]);
 
   useEffect(() => {
@@ -77,6 +92,12 @@ export default function ExplanationModal({
     setExplanation(null);
     setError(null);
     onClose();
+  };
+
+  const handleProviderChange = (nextProvider: AiProvider) => {
+    setProvider(nextProvider);
+    setExplanation(null);
+    setError(null);
   };
 
   if (!isOpen) return null;
@@ -135,12 +156,40 @@ export default function ExplanationModal({
             </div>
           </div>
 
+          <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/40">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <label
+                  htmlFor="ai-provider"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200"
+                >
+                  Explanation provider
+                </label>
+                <select
+                  id="ai-provider"
+                  value={provider}
+                  onChange={(event) =>
+                    handleProviderChange(event.target.value as AiProvider)
+                  }
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 md:min-w-64"
+                >
+                  <option value="ollama">Ollama</option>
+                  <option value="nim">Kimi via NVIDIA NIM</option>
+                </select>
+              </div>
+              <p className="max-w-md text-xs text-gray-500 dark:text-gray-400">
+                This choice is stored for the current browser session only.
+                Ollama stays available even if Kimi is configured.
+              </p>
+            </div>
+          </div>
+
           {/* Loading State */}
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
               <p className="text-gray-600 dark:text-gray-400">
-                Analyzing alert and generating explanation...
+                Analyzing alert with {getAiProviderLabel(provider)}...
               </p>
             </div>
           )}
@@ -181,6 +230,14 @@ export default function ExplanationModal({
           {/* Explanation Content */}
           {explanation && !isLoading && (
             <div>
+              <div className="mb-4 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <span className="rounded-full border border-gray-300 px-2 py-1 dark:border-gray-600">
+                  Provider: {getAiProviderLabel(explanation.provider)}
+                </span>
+                <span className="rounded-full border border-gray-300 px-2 py-1 font-mono dark:border-gray-600">
+                  Model: {explanation.model}
+                </span>
+              </div>
               <div className="prose dark:prose-invert max-w-none">
                 <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 leading-relaxed">
                   {explanation.explanation}

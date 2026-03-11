@@ -10,7 +10,9 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # EVE.json source
-    eve_json_path: Path = Path(__file__).resolve().parent.parent.parent / "data" / "eve.json"
+    eve_json_path: Path = (
+        Path(__file__).resolve().parent.parent.parent / "data" / "eve.json"
+    )
     eve_watcher_poll_interval: float = 0.5
     eve_watcher_enabled: bool = True
     eve_watcher_start_at_end: bool = False
@@ -19,6 +21,16 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./vigilan.db"
     raw_events_max_rows: int = 10000
     secure_ui_origin: str = "https://localhost:3443"
+
+    # LLM / RAG
+    llm_provider_default: Literal["ollama", "nim"] = "ollama"
+    ollama_host: str = "http://localhost:11434"
+    ollama_model: str = "mistral:latest"
+    embedding_model: str = "mxbai-embed-large"
+    nim_base_url: str = "https://integrate.api.nvidia.com/v1"
+    nim_model: str = "moonshotai/kimi-k2-instruct"
+    nim_api_key: str | None = None
+    nim_timeout_seconds: float = 60.0
 
     # Authentication
     auth_cookie_name: str = "vigilan_session"

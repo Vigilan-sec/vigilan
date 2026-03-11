@@ -1,14 +1,19 @@
-import os
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_ollama.llms import OllamaLLM
-from langchain_chroma import Chroma
 from typing import Iterable
+
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_chroma import Chroma
 from logging import getLogger
+
+from app.rag.providers import LLMInvocationResult, invoke_llm
 
 logger = getLogger(__name__)
 
 
-def generate_response(query: str, relevant_docs: list) -> str:
+def generate_response(
+    query: str,
+    relevant_docs: list,
+    provider: str | None = None,
+) -> LLMInvocationResult:
     """
     Generate a response using an LLM based on the query and relevant documents.
     Args:
@@ -45,22 +50,36 @@ Answer:
     prompt = ChatPromptTemplate.from_template(prompt_text)
     formatted_prompt = prompt.format(content_text=content_text, query=query)
 
-    ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-    llm = OllamaLLM(model="mistral:latest", base_url=ollama_host)
     try:
-        response = llm.invoke(formatted_prompt)
+        response = invoke_llm(formatted_prompt, provider=provider)
     except Exception as e:
         logger.error(f"LLM generation failed: {e}")
-        response = "Error generating response."
+        fallback_provider = provider or "ollama"
+        return LLMInvocationResult(
+            text="Error generating response.",
+            provider=(
+                fallback_provider
+                if fallback_provider in {"ollama", "nim"}
+                else "ollama"
+            ),
+            model="unknown",
+        )
     # Normalize a few possible polite refusals into the canonical phrase
-    if isinstance(response, str):
-        low = response.strip().lower()
-        if low in ("i don't know", "i do not know", "cannot answer", "i'm not sure"):
-            return "I don't know"
+    low = response.text.strip().lower()
+    if low in ("i don't know", "i do not know", "cannot answer", "i'm not sure"):
+        return LLMInvocationResult(
+            text="I don't know",
+            provider=response.provider,
+            model=response.model,
+        )
     return response
 
 
-def generate_alert_explanation(alert_data: dict, relevant_docs: list) -> str:
+def generate_alert_explanation(
+    alert_data: dict,
+    relevant_docs: list,
+    provider: str | None = None,
+) -> LLMInvocationResult:
     """
     Generate an explanation and mitigation advice for a security alert.
     Args:
@@ -92,21 +111,27 @@ def generate_alert_explanation(alert_data: dict, relevant_docs: list) -> str:
     # Build protocol context section
     proto_context_parts = []
     if http_context:
-        proto_context_parts.append(f"HTTP: method={http_context.get('http_method', 'N/A')}, "
-                                   f"host={http_context.get('hostname', 'N/A')}, "
-                                   f"url={http_context.get('url', 'N/A')}, "
-                                   f"user_agent={http_context.get('http_user_agent', 'N/A')}, "
-                                   f"status={http_context.get('status', 'N/A')}")
+        proto_context_parts.append(
+            f"HTTP: method={http_context.get('http_method', 'N/A')}, "
+            f"host={http_context.get('hostname', 'N/A')}, "
+            f"url={http_context.get('url', 'N/A')}, "
+            f"user_agent={http_context.get('http_user_agent', 'N/A')}, "
+            f"status={http_context.get('status', 'N/A')}"
+        )
     if dns_context:
-        proto_context_parts.append(f"DNS: type={dns_context.get('type', 'N/A')}, "
-                                   f"query={dns_context.get('rrname', 'N/A')}, "
-                                   f"rrtype={dns_context.get('rrtype', 'N/A')}, "
-                                   f"rcode={dns_context.get('rcode', 'N/A')}")
+        proto_context_parts.append(
+            f"DNS: type={dns_context.get('type', 'N/A')}, "
+            f"query={dns_context.get('rrname', 'N/A')}, "
+            f"rrtype={dns_context.get('rrtype', 'N/A')}, "
+            f"rcode={dns_context.get('rcode', 'N/A')}"
+        )
     if tls_context:
-        proto_context_parts.append(f"TLS: sni={tls_context.get('sni', 'N/A')}, "
-                                   f"version={tls_context.get('version', 'N/A')}, "
-                                   f"subject={tls_context.get('subject', 'N/A')}, "
-                                   f"issuer={tls_context.get('issuerdn', 'N/A')}")
+        proto_context_parts.append(
+            f"TLS: sni={tls_context.get('sni', 'N/A')}, "
+            f"version={tls_context.get('version', 'N/A')}, "
+            f"subject={tls_context.get('subject', 'N/A')}, "
+            f"issuer={tls_context.get('issuerdn', 'N/A')}"
+        )
     proto_context_str = "\n".join(proto_context_parts) if proto_context_parts else "N/A"
 
     prompt_text = """
@@ -156,13 +181,20 @@ Response:
         content_text=content_text,
     )
 
-    ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-    llm = OllamaLLM(model="mistral:latest", base_url=ollama_host)
     try:
-        response = llm.invoke(formatted_prompt)
+        response = invoke_llm(formatted_prompt, provider=provider)
     except Exception as e:
         logger.error(f"LLM generation failed: {e}")
-        response = "Error generating alert explanation."
+        fallback_provider = provider or "ollama"
+        return LLMInvocationResult(
+            text="Error generating alert explanation.",
+            provider=(
+                fallback_provider
+                if fallback_provider in {"ollama", "nim"}
+                else "ollama"
+            ),
+            model="unknown",
+        )
 
     return response
 
@@ -189,4 +221,4 @@ def run_rag_pipeline(query: str, embeddings, persist_dir: str) -> dict:
 
     results = db.similarity_search_with_score(query, k=2)
     response = generate_response(query, results)
-    return {"response": response}
+    return {"response": response.text}

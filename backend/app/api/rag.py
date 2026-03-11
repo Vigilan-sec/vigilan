@@ -2,10 +2,12 @@ import logging
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from typing import Literal
 
 from app.rag.embeddings import get_embedding_model
 from app.rag.vector_store import load_vector_store, search_vector_store
 from app.rag.rag import generate_alert_explanation
+from app.rag.providers import ProviderConfigurationError, resolve_provider_name
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +27,14 @@ class AlertExplanationRequest(BaseModel):
     http_context: dict | None = None
     dns_context: dict | None = None
     tls_context: dict | None = None
+    provider: Literal["ollama", "nim"] | None = None
 
 
 class AlertExplanationResponse(BaseModel):
     explanation: str
     sources_found: int
+    provider: Literal["ollama", "nim"]
+    model: str
 
 
 # Global variables for RAG system (lazy loaded)
@@ -92,6 +97,7 @@ async def explain_alert(request: AlertExplanationRequest):
     }
 
     try:
+        selected_provider = resolve_provider_name(request.provider)
         relevant_docs = []
         sources_found = 0
 
@@ -120,12 +126,21 @@ async def explain_alert(request: AlertExplanationRequest):
             )
 
         # Generate explanation using LLM (with or without RAG context)
-        explanation = generate_alert_explanation(alert_data, relevant_docs)
-
-        return AlertExplanationResponse(
-            explanation=explanation, sources_found=sources_found
+        explanation = generate_alert_explanation(
+            alert_data,
+            relevant_docs,
+            provider=selected_provider,
         )
 
+        return AlertExplanationResponse(
+            explanation=explanation.text,
+            sources_found=sources_found,
+            provider=explanation.provider,
+            model=explanation.model,
+        )
+
+    except ProviderConfigurationError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         logger.exception(f"Error generating alert explanation: {e}")
         # Check if it's an Ollama connection error

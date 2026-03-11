@@ -1,6 +1,5 @@
 services:
-
-#services réseaux pour le lab IDS
+  #services réseaux pour le lab IDS
   gateway:
     build:
       context: ./suricata
@@ -30,12 +29,14 @@ services:
     entrypoint: ["/bin/bash", "/lab/gateway-entrypoint.sh"]
     restart: unless-stopped
 
-# Backend python pour le traitement du système
+  # Backend python pour le traitement du système
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: backend
+    env_file:
+      - .env.docker
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
@@ -50,7 +51,13 @@ services:
       - VIGILAN_SECURE_UI_ORIGIN=https://localhost:${SECURE_UI_PORT:-3443}
       - VIGILAN_EVE_WATCHER_START_AT_END=${EVE_START_AT_END:-true}
       - VIGILAN_DEBUG=${DEBUG:-false}
-      - OLLAMA_HOST=http://host.docker.internal:11434
+      - VIGILAN_OLLAMA_HOST=${VIGILAN_OLLAMA_HOST:-http://host.docker.internal:11434}
+      - VIGILAN_OLLAMA_MODEL=${VIGILAN_OLLAMA_MODEL:-mistral:latest}
+      - VIGILAN_EMBEDDING_MODEL=${VIGILAN_EMBEDDING_MODEL:-mxbai-embed-large}
+      - VIGILAN_LLM_PROVIDER_DEFAULT=${VIGILAN_LLM_PROVIDER_DEFAULT:-ollama}
+      - VIGILAN_NIM_BASE_URL=${VIGILAN_NIM_BASE_URL:-https://integrate.api.nvidia.com/v1}
+      - VIGILAN_NIM_MODEL=${VIGILAN_NIM_MODEL:-moonshotai/kimi-k2-instruct}
+      - VIGILAN_NIM_TIMEOUT_SECONDS=${VIGILAN_NIM_TIMEOUT_SECONDS:-60}
       - TZ=Europe/Paris
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -71,8 +78,7 @@ services:
       retries: 3
       start_period: 10s
 
-
-# app node pour l'interface utilisateur
+  # app node pour l'interface utilisateur
   frontend:
     build:
       context: ./frontend
@@ -107,8 +113,7 @@ services:
         condition: service_started
     restart: unless-stopped
 
-
-# 1st vistim
+  # 1st vistim
   victim:
     build:
       context: ./scripts/lab
