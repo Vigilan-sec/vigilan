@@ -23,7 +23,10 @@ export default function NetworkSidebarPanel({
   }
 
   return (
-    <div className="mx-3 mb-4 rounded-xl border border-app surface-1 p-3">
+    <Link
+      href="/network"
+      className="mx-3 mb-4 block rounded-xl border border-app surface-1 p-3 transition-colors hover-surface-3"
+    >
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-subtle">
@@ -35,13 +38,7 @@ export default function NetworkSidebarPanel({
               : "Loading devices..."}
           </p>
         </div>
-        <Link
-          href="/network"
-          className="text-[11px] text-muted transition-colors hover:text-strong"
-        >
-          Open
-        </Link>
       </div>
-    </div>
+    </Link>
   );
 }
