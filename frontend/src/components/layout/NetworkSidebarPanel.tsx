@@ -26,7 +26,7 @@ export default function NetworkSidebarPanel({
     <div className="mx-3 mb-4 rounded-xl border border-app surface-1 p-3">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-subtle">
+          <h2 className="text-sm font-semibold text-subtle">
             Network
           </h2>
           <p className="mt-1 text-[11px] text-muted">

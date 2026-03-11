@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="fr" data-theme="mocha">
       <body
-        className={`${geistMono.variable} font-mono antialiased app-body`}
+        className={`${geistMono.variable} antialiased app-body`}
       >
         <AuthProvider>
           <AppShell>{children}</AppShell>
