@@ -8,9 +8,11 @@ import { fetchAlerts } from "@/lib/api";
 import { formatTimestamp, protocolColor } from "@/lib/utils";
 import SeverityBadge from "@/components/alerts/SeverityBadge";
 import ExplanationModal from "@/components/alerts/ExplanationModal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function AlertsTable() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [severity, setSeverity] = useState("");
   const [search, setSearch] = useState("");
@@ -106,6 +108,17 @@ export default function AlertsTable() {
     [],
   );
 
+  const columns = [
+    t("alerts.colId"),
+    t("alerts.colTime"),
+    t("alerts.colSeverity"),
+    t("alerts.colSignature"),
+    t("alerts.colSource"),
+    t("alerts.colDest"),
+    t("alerts.colProto"),
+    t("alerts.colAction"),
+  ];
+
   return (
     <div className="space-y-4">
       {/* Filter Bar */}
@@ -115,24 +128,24 @@ export default function AlertsTable() {
           onChange={handleSeverityChange}
           className="rounded-md border px-3 py-2 text-sm input-base"
         >
-          <option value="">All Severities</option>
-          <option value="1">High</option>
-          <option value="2">Medium</option>
-          <option value="3">Low</option>
+          <option value="">{t("alerts.allSeverities")}</option>
+          <option value="1">{t("alerts.high")}</option>
+          <option value="2">{t("alerts.medium")}</option>
+          <option value="3">{t("alerts.low")}</option>
         </select>
         <form onSubmit={handleSearch} className="flex flex-1 gap-2 min-w-50">
           <input
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search signatures, IPs..."
+            placeholder={t("alerts.searchPlaceholder")}
             className="flex-1 rounded-md border px-3 py-2 text-sm input-base"
           />
           <button
             type="submit"
             className="rounded-md px-4 py-2 text-sm font-medium btn-base transition-colors"
           >
-            Search
+            {t("common.search")}
           </button>
         </form>
         {search && (
@@ -144,7 +157,7 @@ export default function AlertsTable() {
             }}
             className="text-xs text-muted hover:text-strong transition-colors"
           >
-            Clear
+            {t("common.clear")}
           </button>
         )}
       </div>
@@ -152,23 +165,14 @@ export default function AlertsTable() {
       {/* Table */}
       {error ? (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-          Failed to load alerts: {error.message}
+          {t("alerts.loadError", { message: error.message })}
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-app">
           <table className="w-full text-sm text-left table-fixed">
             <thead className="sticky top-0 z-10 surface-2 text-xs uppercase text-muted border-b border-app">
               <tr>
-                {[
-                  "ID",
-                  "Time",
-                  "Severity",
-                  "Signature",
-                  "Src IP:Port",
-                  "Dest IP:Port",
-                  "Proto",
-                  "Action",
-                ].map((label, index) => (
+                {columns.map((label, index) => (
                   <th
                     key={label}
                     className="relative px-4 py-3 font-medium"
@@ -185,7 +189,7 @@ export default function AlertsTable() {
                   className="px-4 py-3 font-medium text-center"
                   style={{ width: colWidths[8] }}
                 >
-                  Explain
+                  {t("alerts.colExplain")}
                 </th>
               </tr>
             </thead>
@@ -195,7 +199,7 @@ export default function AlertsTable() {
                   <td colSpan={9} className="px-4 py-8 text-center text-subtle">
                     <span className="inline-flex items-center gap-2">
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--border)] border-t-[color:var(--text-strong)]" />
-                      Loading...
+                      {t("common.loading")}
                     </span>
                   </td>
                 </tr>
@@ -259,16 +263,16 @@ export default function AlertsTable() {
                             : "bg-green-500/20 text-green-400"
                         }`}
                       >
-                        {alert.action}
+                        {alert.action === "blocked" ? t("action.blocked") : t("action.allowed")}
                       </span>
                     </td>
                     <td className="px-4 py-3" style={{ width: colWidths[8] }}>
                       <button
                         onClick={(e) => handleExplain(e, alert)}
                         className="px-3 py-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md transition-colors"
-                        title="Explain this alert"
+                        title={t("alerts.explain")}
                       >
-                        Explain
+                        {t("alerts.explain")}
                       </button>
                     </td>
                   </tr>
@@ -276,7 +280,7 @@ export default function AlertsTable() {
               ) : (
                 <tr>
                   <td colSpan={9} className="px-4 py-8 text-center text-subtle">
-                    No alerts found
+                    {t("alerts.noAlerts")}
                   </td>
                 </tr>
               )}
@@ -289,7 +293,7 @@ export default function AlertsTable() {
       {data && data.pages > 1 && (
         <div className="flex items-center justify-between rounded-lg border border-app surface-2 px-4 py-3">
           <p className="text-xs text-muted">
-            Showing page {data.page} of {data.pages} ({data.total} total alerts)
+            {t("alerts.showingPage", { page: data.page, pages: data.pages, total: data.total })}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -297,7 +301,7 @@ export default function AlertsTable() {
               disabled={page <= 1}
               className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Previous
+              {t("common.previous")}
             </button>
             {generatePageNumbers(data.page, data.pages).map((p, i) =>
               p === null ? (
@@ -323,7 +327,7 @@ export default function AlertsTable() {
               disabled={page >= data.pages}
               className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Next
+              {t("common.next")}
             </button>
           </div>
         </div>

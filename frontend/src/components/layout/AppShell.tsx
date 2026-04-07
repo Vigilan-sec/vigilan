@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const PUBLIC_PATHS = new Set(["/login"]);
 
@@ -21,6 +22,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { t } = useTranslation();
 
   const isPublicRoute = PUBLIC_PATHS.has(pathname);
   const shouldRedirect = !isPublicRoute && !loading && !user;
@@ -36,11 +38,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (loading) {
-    return <LoadingScreen message="Checking local admin session..." />;
+    return <LoadingScreen message={t("shell.checkingSession")} />;
   }
 
   if (!user) {
-    return <LoadingScreen message="Redirecting to secure login..." />;
+    return <LoadingScreen message={t("shell.redirecting")} />;
   }
 
   return (

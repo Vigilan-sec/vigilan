@@ -5,8 +5,10 @@ import useSWR from "swr";
 import type { FlowRecord, PaginatedResponse } from "@/lib/types";
 import { fetchFlows } from "@/lib/api";
 import { formatTimestamp, protocolColor, formatBytes, formatNumber } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function FlowsTable() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [isResizing, setIsResizing] = useState(false);
   const [colWidths, setColWidths] = useState<number[]>([
@@ -72,30 +74,32 @@ export default function FlowsTable() {
     { refreshInterval: 10000 }
   );
 
+  const columns = [
+    t("flows.colTime"),
+    t("flows.colProto"),
+    t("flows.colSource"),
+    t("flows.colDest"),
+    t("flows.colBytesSent"),
+    t("flows.colBytesRecv"),
+    t("flows.colPktsSent"),
+    t("flows.colPktsRecv"),
+    t("flows.colDuration"),
+    t("flows.colState"),
+  ];
+
   return (
     <div className="space-y-4">
       {/* Table */}
       {error ? (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-          Failed to load flows: {error.message}
+          {t("flows.loadError", { message: error.message })}
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-app">
           <table className="w-full text-sm text-left table-fixed">
             <thead className="sticky top-0 z-10 surface-2 text-xs uppercase text-muted border-b border-app">
               <tr>
-                {[
-                  "Time",
-                  "Proto",
-                  "Source",
-                  "Destination",
-                  "Bytes \u2191",
-                  "Bytes \u2193",
-                  "Pkts \u2191",
-                  "Pkts \u2193",
-                  "Duration",
-                  "State",
-                ].map((label, index) => (
+                {columns.map((label, index) => (
                   <th
                     key={label}
                     className={`relative px-4 py-3 font-medium ${
@@ -118,7 +122,7 @@ export default function FlowsTable() {
                   <td colSpan={10} className="px-4 py-8 text-center text-subtle">
                     <span className="inline-flex items-center gap-2">
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--border)] border-t-[color:var(--text-strong)]" />
-                      Loading...
+                      {t("common.loading")}
                     </span>
                   </td>
                 </tr>
@@ -196,7 +200,7 @@ export default function FlowsTable() {
                     colSpan={10}
                     className="px-4 py-8 text-center text-subtle"
                   >
-                    No flows found
+                    {t("flows.noFlows")}
                   </td>
                 </tr>
               )}
@@ -209,7 +213,7 @@ export default function FlowsTable() {
       {data && data.pages > 1 && (
         <div className="flex items-center justify-between rounded-lg border border-app surface-2 px-4 py-3">
           <p className="text-xs text-muted">
-            Showing page {data.page} of {data.pages} ({data.total} total flows)
+            {t("flows.showingPage", { page: data.page, pages: data.pages, total: data.total })}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -217,7 +221,7 @@ export default function FlowsTable() {
               disabled={page <= 1}
               className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Previous
+              {t("common.previous")}
             </button>
             {generatePageNumbers(data.page, data.pages).map((p, i) =>
               p === null ? (
@@ -243,7 +247,7 @@ export default function FlowsTable() {
               disabled={page >= data.pages}
               className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Next
+              {t("common.next")}
             </button>
           </div>
         </div>
@@ -253,6 +257,7 @@ export default function FlowsTable() {
 }
 
 function FlowStateBadge({ state }: { state: string | null }) {
+  const { t } = useTranslation();
   if (!state) return <span className="text-xs text-subtle">--</span>;
 
   const colorMap: Record<string, string> = {
@@ -261,13 +266,21 @@ function FlowStateBadge({ state }: { state: string | null }) {
     closed: "chip-muted",
   };
 
-  const color = colorMap[state.toLowerCase()] ?? "chip-muted";
+  const labelMap: Record<string, string> = {
+    new: t("flows.stateNew"),
+    established: t("flows.stateEstablished"),
+    closed: t("flows.stateClosed"),
+  };
+
+  const key = state.toLowerCase();
+  const color = colorMap[key] ?? "chip-muted";
+  const label = labelMap[key] ?? state;
 
   return (
     <span
       className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${color}`}
     >
-      {state}
+      {label}
     </span>
   );
 }

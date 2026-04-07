@@ -1,30 +1,33 @@
 "use client";
 
 import type { WsStatus } from "@/hooks/useWebSocket";
+import { useTranslation } from "@/hooks/useTranslation";
+import type { TranslationKey } from "@/lib/i18n/translations";
 
 interface LiveIndicatorProps {
   status: WsStatus;
 }
 
-const statusConfig: Record<WsStatus, { color: string; pulse: boolean; label: string }> = {
+const statusConfig: Record<WsStatus, { color: string; pulse: boolean; labelKey: TranslationKey }> = {
   connected: {
     color: "bg-green-500",
     pulse: true,
-    label: "Live",
+    labelKey: "live.connected",
   },
   connecting: {
     color: "bg-yellow-500",
     pulse: true,
-    label: "Connecting",
+    labelKey: "live.connecting",
   },
   disconnected: {
     color: "bg-red-500",
     pulse: false,
-    label: "Disconnected",
+    labelKey: "live.disconnected",
   },
 };
 
 export default function LiveIndicator({ status }: LiveIndicatorProps) {
+  const { t } = useTranslation();
   const config = statusConfig[status];
 
   return (
@@ -39,7 +42,7 @@ export default function LiveIndicator({ status }: LiveIndicatorProps) {
           className={`relative inline-flex h-2.5 w-2.5 rounded-full ${config.color}`}
         />
       </span>
-      {config.label}
+      {t(config.labelKey)}
     </span>
   );
 }

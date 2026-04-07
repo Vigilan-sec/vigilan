@@ -8,6 +8,7 @@ import IPBreakdownCharts from "@/components/dashboard/IPBreakdownCharts";
 import ScenarioGrid from "@/components/security/ScenarioGrid";
 import RecentSecurityHits from "@/components/security/RecentSecurityHits";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useTranslation } from "@/hooks/useTranslation";
 import useSWR from "swr";
 import {
   fetchAlertStats,
@@ -24,6 +25,7 @@ import type {
 
 export default function DashboardPage() {
   const { alerts, status } = useWebSocket();
+  const { t } = useTranslation();
   const { data: alertStats } = useSWR<AlertStats>("alert-stats", () => fetchAlertStats() as Promise<AlertStats>, {
     refreshInterval: 10000,
     fallbackData: undefined,
@@ -45,7 +47,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      <Header title="Dashboard" wsStatus={status} />
+      <Header title={t("dashboard.title")} wsStatus={status} />
       <div className="p-6 space-y-6">
         <SummaryCards alertStats={alertStats} flowStats={flowStats} />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

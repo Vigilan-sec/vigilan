@@ -3,10 +3,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function LoginPage() {
   const router = useRouter();
   const { user, login, loading } = useAuth();
+  const { t } = useTranslation();
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -48,16 +50,16 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.15),_transparent_40%),var(--surface-1)] px-4">
       <div className="w-full max-w-md rounded-2xl border border-app surface-2 p-8 shadow-2xl shadow-black/20">
         <div className="mb-6">
-          <p className="text-xs uppercase tracking-[0.3em] text-blue-300">Vigilan Secure Console</p>
-          <h1 className="mt-2 text-2xl font-semibold text-strong">Local admin sign-in</h1>
+          <p className="text-xs uppercase tracking-[0.3em] text-blue-300">{t("auth.title")}</p>
+          <h1 className="mt-2 text-2xl font-semibold text-strong">{t("auth.subtitle")}</h1>
           <p className="mt-2 text-sm text-subtle">
-            Sign in with the local admin account to access alerts, flows, playbooks, and live cyber views.
+            {t("auth.description")}
           </p>
         </div>
 
         {protocol !== "https:" && (
           <div className="mb-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-            Secure cookies require the HTTPS gateway. Open the UI from{" "}
+            {t("auth.httpsWarning")}{" "}
             <span className="font-mono">https://localhost:3443</span>.
           </div>
         )}
@@ -70,7 +72,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block text-sm text-muted">
-            Username
+            {t("auth.username")}
             <input
               type="text"
               value={username}
@@ -81,7 +83,7 @@ export default function LoginPage() {
             />
           </label>
           <label className="block text-sm text-muted">
-            Password
+            {t("auth.password")}
             <input
               type="password"
               value={password}
@@ -96,12 +98,12 @@ export default function LoginPage() {
             disabled={submitting}
             className="w-full rounded-md bg-blue-500/20 px-4 py-2.5 text-sm font-semibold text-blue-200 transition-colors hover:bg-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Signing in..." : "Sign in"}
+            {submitting ? t("auth.signingIn") : t("auth.signIn")}
           </button>
         </form>
 
         <div className="mt-6 rounded-lg border border-app surface-1 px-4 py-3 text-xs text-subtle">
-          Local-only auth is backed by the backend SQLite database and secured with an HttpOnly session cookie.
+          {t("auth.localNote")}
         </div>
       </div>
     </div>

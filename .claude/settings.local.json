@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(docker compose:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npx tsc:*)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(xargs grep:*)",
+      "Bash(curl -s http://localhost:11434/api/tags)"
     ]
   },
   "outputStyle": "default"

@@ -5,6 +5,7 @@ import useSWR from "swr";
 import type { RawEvent, PaginatedResponse } from "@/lib/types";
 import { fetchEvents } from "@/lib/api";
 import { formatTimestamp } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const eventTypeColors: Record<string, string> = {
   alert: "bg-red-500/20 text-red-400",
@@ -22,6 +23,7 @@ function getEventTypeColor(type: string): string {
 }
 
 export default function EventLog() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
@@ -60,7 +62,7 @@ export default function EventLog() {
     <div className="space-y-4">
       {error ? (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-          Failed to load events: {error.message}
+          {t("events.loadError", { message: error.message })}
         </div>
       ) : (
         <div className="space-y-2">
@@ -68,7 +70,7 @@ export default function EventLog() {
             <div className="flex items-center justify-center py-12">
               <span className="inline-flex items-center gap-2 text-sm text-subtle">
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--border)] border-t-[color:var(--text-strong)]" />
-                Loading events...
+                {t("events.loading")}
               </span>
             </div>
           ) : data && data.items.length > 0 ? (
@@ -114,7 +116,7 @@ export default function EventLog() {
                           ID: <span className="font-mono text-muted">{event.id}</span>
                         </span>
                         <span>
-                          Ingested:{" "}
+                          {t("events.ingested")}{" "}
                           <span className="font-mono text-muted">
                             {formatTimestamp(event.ingested_at)}
                           </span>
@@ -130,7 +132,7 @@ export default function EventLog() {
             })
           ) : (
             <div className="rounded-lg border border-app surface-2 px-4 py-8 text-center text-subtle text-sm">
-              No events found
+              {t("events.noEvents")}
             </div>
           )}
         </div>
@@ -140,7 +142,7 @@ export default function EventLog() {
       {data && data.pages > 1 && (
         <div className="flex items-center justify-between rounded-lg border border-app surface-2 px-4 py-3">
           <p className="text-xs text-muted">
-            Showing page {data.page} of {data.pages} ({data.total} total events)
+            {t("events.showingPage", { page: data.page, pages: data.pages, total: data.total })}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -148,7 +150,7 @@ export default function EventLog() {
               disabled={page <= 1}
               className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Previous
+              {t("common.previous")}
             </button>
             <span className="text-xs font-mono text-muted">
               {data.page} / {data.pages}
@@ -158,7 +160,7 @@ export default function EventLog() {
               disabled={page >= data.pages}
               className="rounded-md border px-3 py-1.5 text-xs input-base hover-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Next
+              {t("common.next")}
             </button>
           </div>
         </div>

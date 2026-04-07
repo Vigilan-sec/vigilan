@@ -48,10 +48,9 @@ QUESTION: {query}
 Answer:
 """
 
-    prompt = ChatPromptTemplate.from_template(prompt_text)
-    formatted_prompt = prompt.format(content_text=content_text, query=query)
-
     try:
+        prompt = ChatPromptTemplate.from_template(prompt_text)
+        formatted_prompt = prompt.format(content_text=content_text, query=query)
         response = invoke_llm(
             formatted_prompt,
             provider=provider,
@@ -178,22 +177,21 @@ Keep the entire response short (under 250 words). Do not repeat the alert detail
 Response:
 """
 
-    prompt = ChatPromptTemplate.from_template(prompt_text)
-    formatted_prompt = prompt.format(
-        signature=signature,
-        category=category,
-        severity=severity,
-        action=action,
-        src_ip=src_ip,
-        dest_ip=dest_ip,
-        proto=proto,
-        app_proto=app_proto,
-        payload_printable=payload_printable,
-        proto_context_str=proto_context_str,
-        content_text=content_text,
-    )
-
     try:
+        prompt = ChatPromptTemplate.from_template(prompt_text)
+        formatted_prompt = prompt.format(
+            signature=signature,
+            category=category,
+            severity=severity,
+            action=action,
+            src_ip=src_ip,
+            dest_ip=dest_ip,
+            proto=proto,
+            app_proto=app_proto,
+            payload_printable=payload_printable,
+            proto_context_str=proto_context_str,
+            content_text=content_text,
+        )
         response = invoke_llm(
             formatted_prompt,
             provider=provider,
@@ -281,13 +279,12 @@ CONVERSATION:
 Answer:
 """
 
-    prompt = ChatPromptTemplate.from_template(prompt_text)
-    formatted_prompt = prompt.format(
-        alerts_text=_format_recent_alerts_for_prompt(recent_alerts),
-        conversation_text=_format_conversation_for_prompt(messages),
-    )
-
     try:
+        prompt = ChatPromptTemplate.from_template(prompt_text)
+        formatted_prompt = prompt.format(
+            alerts_text=_format_recent_alerts_for_prompt(recent_alerts),
+            conversation_text=_format_conversation_for_prompt(messages),
+        )
         return invoke_llm(
             formatted_prompt,
             provider=provider,

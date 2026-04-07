@@ -13,6 +13,7 @@ import {
   useAiProviderPreference,
 } from "@/hooks/useAiProviderPreference";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useTranslation } from "@/hooks/useTranslation";
 import { chatWithAssistant, fetchAlerts } from "@/lib/api";
 import type {
   AiProvider,
@@ -22,11 +23,6 @@ import type {
 import { formatTimestamp } from "@/lib/utils";
 
 const RECENT_ALERT_LIMIT = 20;
-const QUICK_PROMPTS = [
-  "Summarize the main attack patterns you see.",
-  "Which alerts should I investigate first and why?",
-  "What containment steps would you recommend right now?",
-];
 
 interface ChatMessage extends AssistantChatMessage {
   id: string;
@@ -43,11 +39,18 @@ export default function AssistantPage() {
   const { status } = useWebSocket();
   const { provider, setProvider } = useAiProviderPreference();
   const { kimiApiKey } = useAppSettings();
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [question, setQuestion] = useState("");
   const [isLoadingReply, setIsLoadingReply] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastAlertCount, setLastAlertCount] = useState(0);
+
+  const QUICK_PROMPTS = [
+    t("assistant.prompt1"),
+    t("assistant.prompt2"),
+    t("assistant.prompt3"),
+  ];
 
   const { data: alertsPage, isLoading: isLoadingAlerts } = useSWR(
     "assistant-recent-alerts",
@@ -120,8 +123,7 @@ export default function AssistantPage() {
         {
           id: "assistant-kimi-missing-key",
           role: "assistant",
-          content:
-            "Kimi is selected, but no API key is configured yet. Add it from Settings or switch back to Ollama to generate the recent-alert recap.",
+          content: t("assistant.kimiMissingMsg"),
           error: true,
         },
       ]);
@@ -140,7 +142,7 @@ export default function AssistantPage() {
     }
 
     if (providerNeedsKey) {
-      setError("Add your Kimi API key in Settings before using Kimi.");
+      setError(t("assistant.kimiNeeded"));
       return;
     }
 
@@ -162,18 +164,17 @@ export default function AssistantPage() {
 
   return (
     <div className="min-h-screen">
-      <Header title="Assistant" wsStatus={status} />
+      <Header title={t("assistant.title")} wsStatus={status} />
       <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
         <section className="flex min-h-[70vh] flex-col rounded-xl border border-app surface-2">
           <div className="border-b border-app px-5 py-4">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <h2 className="text-sm font-semibold text-strong">
-                  Recent-alert copilot
+                  {t("assistant.copilotTitle")}
                 </h2>
                 <p className="mt-1 text-xs text-subtle">
-                  Ask for prioritization, explanations, or next steps based on
-                  the latest alerts seen by Vigilan.
+                  {t("assistant.copilotDesc")}
                 </p>
               </div>
 
@@ -182,7 +183,7 @@ export default function AssistantPage() {
                   htmlFor="assistant-provider"
                   className="text-xs font-medium text-muted"
                 >
-                  Model
+                  {t("assistant.model")}
                 </label>
                 <select
                   id="assistant-provider"
@@ -200,14 +201,18 @@ export default function AssistantPage() {
 
             <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-subtle">
               <span className="rounded-full border border-app px-2 py-1">
-                Provider: {getAiProviderLabel(provider)}
+                {t("assistant.provider", { label: getAiProviderLabel(provider) })}
               </span>
               <span className="rounded-full border border-app px-2 py-1">
-                Alerts in scope: {lastAlertCount || recentAlerts.length}
+                {t("assistant.alertsInScope", { count: lastAlertCount || recentAlerts.length })}
               </span>
               {provider === "nim" && (
                 <span className="rounded-full border border-app px-2 py-1">
-                  Kimi key: {kimiEnabled ? "configured" : "missing"}
+                  {t("assistant.kimiKey", {
+                    status: kimiEnabled
+                      ? t("assistant.kimiKeyConfigured")
+                      : t("assistant.kimiKeyMissing"),
+                  })}
                 </span>
               )}
             </div>
@@ -227,7 +232,7 @@ export default function AssistantPage() {
               >
                 <div className="mb-2 flex items-center justify-between gap-3 text-[11px] uppercase tracking-wide">
                   <span>
-                    {message.role === "user" ? "You" : "Assistant"}
+                    {message.role === "user" ? t("assistant.you") : t("assistant.assistant")}
                   </span>
                   {message.provider && message.model && (
                     <span className="text-subtle normal-case">
@@ -245,12 +250,12 @@ export default function AssistantPage() {
 
             {isLoadingReply && (
               <div className="max-w-3xl rounded-2xl border border-app surface-1 px-4 py-3 text-sm text-subtle">
-                Analyzing the latest alerts with {getAiProviderLabel(provider)}...
+                {t("assistant.analyzing", { provider: getAiProviderLabel(provider) })}
               </div>
             )}
 
             <section className="max-w-3xl rounded-xl border border-app surface-1 p-4">
-              <h2 className="text-sm font-semibold text-strong">Quick prompts</h2>
+              <h2 className="text-sm font-semibold text-strong">{t("assistant.quickPrompts")}</h2>
               <div className="mt-3 flex flex-col gap-2 text-sm">
                 {QUICK_PROMPTS.map((prompt) => (
                   <button
@@ -269,11 +274,11 @@ export default function AssistantPage() {
           <div className="border-t border-app px-5 py-4">
             {providerNeedsKey && (
               <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                Add your Kimi API key in{" "}
+                {t("assistant.kimiWarning")}{" "}
                 <Link href="/settings" className="font-semibold underline">
-                  Settings
+                  {t("assistant.kimiWarningLink")}
                 </Link>{" "}
-                or switch back to Ollama to chat.
+                {t("assistant.kimiWarningOr")}
               </div>
             )}
             {error && !providerNeedsKey && (
@@ -285,20 +290,20 @@ export default function AssistantPage() {
               <textarea
                 value={question}
                 onChange={(event) => setQuestion(event.target.value)}
-                placeholder="Ask about suspicious sources, top priorities, or what to investigate next..."
+                placeholder={t("assistant.placeholder")}
                 className="min-h-28 w-full rounded-xl border px-4 py-3 text-sm input-base"
                 disabled={isLoadingReply}
               />
               <div className="flex items-center justify-between gap-3">
                 <p className="text-xs text-subtle">
-                  Example: “Which alerts look the most critical right now?”
+                  {t("assistant.example")}
                 </p>
                 <button
                   type="submit"
                   disabled={isLoadingReply || !question.trim()}
                   className="btn-primary rounded-md border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Send
+                  {t("assistant.send")}
                 </button>
               </div>
             </form>
@@ -309,27 +314,27 @@ export default function AssistantPage() {
           <section className="rounded-xl border border-app surface-2 p-5">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-strong">
-                Recent alerts in context
+                {t("assistant.recentAlerts")}
               </h2>
               <Link
                 href="/alerts"
                 className="text-xs text-muted transition-colors hover:text-strong"
               >
-                Open alerts &rarr;
+                {t("assistant.openAlerts")}
               </Link>
             </div>
             <p className="mt-1 text-xs text-subtle">
-              The assistant recap is grounded in the latest {RECENT_ALERT_LIMIT} alerts.
+              {t("assistant.recentAlertsDesc", { limit: RECENT_ALERT_LIMIT })}
             </p>
 
             <div className="mt-4 space-y-3">
               {isLoadingAlerts ? (
                 <div className="rounded-lg border border-app surface-1 px-4 py-6 text-center text-sm text-subtle">
-                  Loading recent alerts...
+                  {t("assistant.loadingAlerts")}
                 </div>
               ) : recentAlerts.length === 0 ? (
                 <div className="rounded-lg border border-app surface-1 px-4 py-6 text-center text-sm text-subtle">
-                  No recent alerts available.
+                  {t("assistant.noRecentAlerts")}
                 </div>
               ) : (
                 recentAlerts.slice(0, 10).map((alert) => (
@@ -353,7 +358,6 @@ export default function AssistantPage() {
               )}
             </div>
           </section>
-
         </aside>
       </div>
     </div>

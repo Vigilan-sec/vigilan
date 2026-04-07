@@ -1,17 +1,22 @@
+"use client";
+
 import { formatNumber } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TopSignaturesProps {
   topSignatures: { signature: string; sid: number; count: number }[];
 }
 
 export default function TopSignatures({ topSignatures }: TopSignaturesProps) {
+  const { t } = useTranslation();
+
   if (!topSignatures || topSignatures.length === 0) {
     return (
       <div className="rounded-lg border border-app surface-2 p-5">
         <h2 className="text-sm font-semibold text-strong mb-4">
-          Top Signatures
+          {t("dashboard.topSignatures")}
         </h2>
-        <p className="text-sm text-subtle">No signature data available</p>
+        <p className="text-sm text-subtle">{t("dashboard.noSignatures")}</p>
       </div>
     );
   }
@@ -21,7 +26,7 @@ export default function TopSignatures({ topSignatures }: TopSignaturesProps) {
   return (
     <div className="rounded-lg border border-app surface-2 p-5">
       <h2 className="text-sm font-semibold text-strong mb-4">
-        Top Signatures
+        {t("dashboard.topSignatures")}
       </h2>
       <div className="space-y-3">
         {topSignatures.map((sig) => {

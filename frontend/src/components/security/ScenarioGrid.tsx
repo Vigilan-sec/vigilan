@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { SecurityScenario } from "@/lib/types";
 import { formatNumber, formatTimestamp } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 function severityClasses(severity: string): string {
   switch (severity) {
@@ -24,6 +25,7 @@ export default function ScenarioGrid({
   scenarios,
   compact = false,
 }: ScenarioGridProps) {
+  const { t } = useTranslation();
   const items = compact ? scenarios.slice(0, 4) : scenarios;
 
   return (
@@ -31,10 +33,10 @@ export default function ScenarioGrid({
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-strong">
-            {compact ? "Threat campaigns" : "Scenario coverage"}
+            {compact ? t("security.campaignsTitle") : t("security.scenariosTitle")}
           </h2>
           <p className="mt-1 text-xs text-subtle">
-            Local attack detections mapped to MITRE-style tactics.
+            {t("security.scenariosDesc")}
           </p>
         </div>
         {compact && (
@@ -42,7 +44,7 @@ export default function ScenarioGrid({
             href="/security"
             className="text-xs text-muted transition-colors hover:text-strong"
           >
-            Open security &rarr;
+            {t("security.openSecurity")}
           </Link>
         )}
       </div>
@@ -56,7 +58,7 @@ export default function ScenarioGrid({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted">
-                  {scenario.tactic}
+                  {t("security.tactic")}: {scenario.tactic}
                 </p>
                 <h3 className="mt-2 text-sm font-semibold text-strong">
                   {scenario.title}
@@ -72,7 +74,7 @@ export default function ScenarioGrid({
             <div className="mt-4 flex items-end justify-between gap-3">
               <div>
                 <p className="text-[10px] uppercase tracking-wide text-subtle">
-                  Alerts
+                  {t("security.alerts")}
                 </p>
                 <p className="mt-1 font-mono text-2xl font-bold text-strong">
                   {formatNumber(scenario.total_alerts)}
@@ -80,16 +82,16 @@ export default function ScenarioGrid({
               </div>
               <div className="text-right">
                 <p className="text-[10px] uppercase tracking-wide text-subtle">
-                  Last seen
+                  {t("security.lastSeen")}
                 </p>
                 <p className="mt-1 text-xs text-muted">
-                  {scenario.last_seen ? formatTimestamp(scenario.last_seen) : "Quiet"}
+                  {scenario.last_seen ? formatTimestamp(scenario.last_seen) : t("security.quiet")}
                 </p>
               </div>
             </div>
             {scenario.last_signature && (
               <p className="mt-3 truncate text-[11px] text-subtle">
-                Latest: {scenario.last_signature}
+                {t("security.latest")} {scenario.last_signature}
               </p>
             )}
           </div>

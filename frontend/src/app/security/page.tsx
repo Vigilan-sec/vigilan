@@ -5,11 +5,13 @@ import Header from "@/components/layout/Header";
 import ScenarioGrid from "@/components/security/ScenarioGrid";
 import RecentSecurityHits from "@/components/security/RecentSecurityHits";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useTranslation } from "@/hooks/useTranslation";
 import { fetchSecurityOverview } from "@/lib/api";
 import type { SecurityOverview } from "@/lib/types";
 
 export default function SecurityPage() {
   const { status } = useWebSocket();
+  const { t } = useTranslation();
   const { data } = useSWR<SecurityOverview>(
     "security-overview",
     fetchSecurityOverview,
@@ -18,7 +20,7 @@ export default function SecurityPage() {
 
   return (
     <div className="min-h-screen">
-      <Header title="Security Scenarios" wsStatus={status} />
+      <Header title={t("security.title")} wsStatus={status} />
       <div className="space-y-6 p-6">
         <ScenarioGrid scenarios={data?.scenarios || []} />
         <RecentSecurityHits overview={data} />

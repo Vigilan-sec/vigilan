@@ -1,0 +1,340 @@
+<svg viewBox="0 0 1440 820" xmlns="http://www.w3.org/2000/svg" width="1440" height="820">
+  <title>Vigilan IDS — Architecture</title>
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+      text { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
+    </style>
+
+    <filter id="shadow-sm" x="-5%" y="-5%" width="115%" height="125%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000018"/>
+    </filter>
+    <filter id="shadow-md" x="-8%" y="-8%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#00000020"/>
+    </filter>
+
+    <marker id="arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F43F5E"/>
+    </marker>
+    <marker id="arrow-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981"/>
+    </marker>
+    <marker id="arrow-indigo" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6366F1"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#06B6D4"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+
+    <symbol id="icon-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 5v14c0 1.66-4.03 3-9 3s-9-1.34-9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
+    </symbol>
+    <symbol id="icon-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="6" cy="18" r="1" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    </symbol>
+    <symbol id="icon-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </symbol>
+    <symbol id="icon-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+    </symbol>
+    <symbol id="icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </symbol>
+    <symbol id="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/>
+    </symbol>
+    <symbol id="icon-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+    </symbol>
+    <symbol id="icon-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </symbol>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1440" height="820" fill="#FFFFFF"/>
+
+  <!-- ── Title ─────────────────────────────────── -->
+  <text x="40" y="46" font-size="20" font-weight="700" fill="#1E293B">Vigilan IDS — Architecture</text>
+  <text x="40" y="66" font-size="12" font-weight="400" fill="#64748B">Next.js 14 · FastAPI · Suricata · SQLite · Ollama / Kimi NIM</text>
+  <line x1="40" y1="74" x2="420" y2="74" stroke="#6366F1" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  NETWORK GROUP  (rose)                                 -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="25" y="108" width="222" height="656" rx="14" fill="#F43F5E1A" stroke="#F43F5E40" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <rect x="37" y="96" width="168" height="24" rx="12" fill="#F43F5E"/>
+  <text x="121" y="112" font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">Surveillance Réseau</text>
+  <!-- sub-label -->
+  <text x="136" y="138" font-size="10" font-weight="500" fill="#9F1239" text-anchor="middle">Suricata IDS · EVE JSON</text>
+
+  <!-- Traffic node -->
+  <rect x="45" y="150" width="182" height="65" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="45" y="150" width="4" height="65" rx="2" fill="#F43F5E"/>
+  <circle cx="70" cy="182" r="14" fill="#FFF1F2"/>
+  <use href="#icon-globe" x="58" y="170" width="24" height="24" color="#F43F5E"/>
+  <text x="92" y="177" font-size="13" font-weight="600" fill="#1E293B">Trafic Réseau</text>
+  <text x="92" y="194" font-size="11" font-weight="400" fill="#64748B">Flux réseau entrant</text>
+
+  <!-- Suricata node -->
+  <rect x="45" y="275" width="182" height="82" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="45" y="275" width="4" height="82" rx="2" fill="#F43F5E"/>
+  <circle cx="70" cy="316" r="14" fill="#FFF1F2"/>
+  <use href="#icon-gear" x="58" y="304" width="24" height="24" color="#F43F5E"/>
+  <text x="92" y="305" font-size="13" font-weight="600" fill="#1E293B">Suricata IDS</text>
+  <text x="92" y="322" font-size="11" font-weight="400" fill="#64748B">Détection d'intrusion</text>
+  <text x="92" y="338" font-size="10" font-weight="400" fill="#9CA3AF">Analyse du trafic réseau</text>
+
+  <!-- EVE Log node -->
+  <rect x="45" y="420" width="182" height="65" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="45" y="420" width="4" height="65" rx="2" fill="#F43F5E"/>
+  <circle cx="70" cy="452" r="14" fill="#FFF1F2"/>
+  <use href="#icon-terminal" x="58" y="440" width="24" height="24" color="#F43F5E"/>
+  <text x="92" y="447" font-size="13" font-weight="600" fill="#1E293B">eve.json</text>
+  <text x="92" y="464" font-size="11" font-weight="400" fill="#64748B">Journal réseau Suricata</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  BACKEND GROUP  (emerald)                              -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="287" y="108" width="310" height="656" rx="14" fill="#10B9811A" stroke="#10B98140" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <rect x="299" y="96" width="160" height="24" rx="12" fill="#10B981"/>
+  <text x="379" y="112" font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">Backend Python</text>
+  <text x="442" y="138" font-size="10" font-weight="500" fill="#065F46" text-anchor="middle">FastAPI · SQLite · Session</text>
+
+  <!-- EVE Watcher node -->
+  <rect x="307" y="150" width="270" height="78" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="307" y="150" width="4" height="78" rx="2" fill="#10B981"/>
+  <circle cx="332" cy="189" r="14" fill="#ECFDF5"/>
+  <use href="#icon-gear" x="320" y="177" width="24" height="24" color="#10B981"/>
+  <text x="354" y="180" font-size="13" font-weight="600" fill="#1E293B">EVE Watcher</text>
+  <text x="354" y="197" font-size="11" font-weight="400" fill="#64748B">Surveillance du journal</text>
+  <text x="354" y="213" font-size="10" font-weight="400" fill="#9CA3AF">Ingestion &amp; parsing temps réel</text>
+
+  <!-- FastAPI node -->
+  <rect x="307" y="288" width="270" height="108" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="307" y="288" width="4" height="108" rx="2" fill="#10B981"/>
+  <circle cx="332" cy="330" r="14" fill="#ECFDF5"/>
+  <use href="#icon-server" x="320" y="318" width="24" height="24" color="#10B981"/>
+  <text x="354" y="315" font-size="13" font-weight="600" fill="#1E293B">FastAPI Backend</text>
+  <text x="354" y="332" font-size="11" font-weight="400" fill="#64748B">REST API · WebSocket</text>
+  <rect x="354" y="340" width="44" height="18" rx="9" fill="#ECFDF5" stroke="#10B981" stroke-width="1"/>
+  <text x="376" y="352" font-size="10" font-weight="600" fill="#065F46" text-anchor="middle">REST</text>
+  <rect x="404" y="340" width="38" height="18" rx="9" fill="#ECFEFF" stroke="#06B6D4" stroke-width="1"/>
+  <text x="423" y="352" font-size="10" font-weight="600" fill="#0E7490" text-anchor="middle">WS</text>
+  <text x="354" y="381" font-size="10" font-weight="400" fill="#9CA3AF">Alertes · Flux · Scénarios · Auth</text>
+
+  <!-- SQLite node -->
+  <rect x="307" y="456" width="270" height="78" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="307" y="456" width="4" height="78" rx="2" fill="#10B981"/>
+  <circle cx="332" cy="495" r="14" fill="#ECFDF5"/>
+  <use href="#icon-database" x="320" y="483" width="24" height="24" color="#10B981"/>
+  <text x="354" y="486" font-size="13" font-weight="600" fill="#1E293B">SQLite</text>
+  <text x="354" y="503" font-size="11" font-weight="400" fill="#64748B">Alertes · Flux · Événements</text>
+  <text x="354" y="519" font-size="10" font-weight="400" fill="#9CA3AF">Utilisateurs · Scénarios d'attaque</text>
+
+  <!-- Auth node -->
+  <rect x="307" y="590" width="270" height="72" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="307" y="590" width="4" height="72" rx="2" fill="#10B981"/>
+  <circle cx="332" cy="626" r="14" fill="#ECFDF5"/>
+  <use href="#icon-lock" x="320" y="614" width="24" height="24" color="#10B981"/>
+  <text x="354" y="617" font-size="13" font-weight="600" fill="#1E293B">Authentification</text>
+  <text x="354" y="634" font-size="11" font-weight="400" fill="#64748B">Session HttpOnly cookie</text>
+  <text x="354" y="650" font-size="10" font-weight="400" fill="#9CA3AF">Rôles : admin · analyst</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  FRONTEND GROUP  (indigo)                              -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="647" y="108" width="460" height="430" rx="14" fill="#6366F11A" stroke="#6366F140" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <rect x="659" y="96" width="188" height="24" rx="12" fill="#6366F1"/>
+  <text x="753" y="112" font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">Frontend Next.js 14</text>
+  <text x="877" y="138" font-size="10" font-weight="500" fill="#4338CA" text-anchor="middle">TypeScript · Tailwind · SWR · i18n FR/EN</text>
+
+  <!-- Pages node -->
+  <rect x="667" y="150" width="200" height="155" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="667" y="150" width="4" height="155" rx="2" fill="#6366F1"/>
+  <circle cx="688" cy="172" r="12" fill="#EEF2FF"/>
+  <use href="#icon-globe" x="676" y="160" width="24" height="24" color="#6366F1"/>
+  <text x="705" y="170" font-size="13" font-weight="600" fill="#1E293B">Pages</text>
+  <text x="679" y="192" font-size="10" font-weight="500" fill="#475569">Dashboard · Alertes</text>
+  <text x="679" y="207" font-size="10" font-weight="500" fill="#475569">Connexions · Journal</text>
+  <text x="679" y="222" font-size="10" font-weight="500" fill="#475569">Scénarios d'attaque</text>
+  <text x="679" y="237" font-size="10" font-weight="500" fill="#475569">Assistant IA · Statut</text>
+  <text x="679" y="252" font-size="10" font-weight="500" fill="#475569">Paramètres · Login</text>
+  <text x="679" y="274" font-size="10" font-weight="400" fill="#9CA3AF">9 pages · App Router</text>
+  <text x="679" y="289" font-size="10" font-weight="400" fill="#9CA3AF">SWR polling · refresh 10s</text>
+
+  <!-- Components node -->
+  <rect x="887" y="150" width="200" height="155" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="887" y="150" width="4" height="155" rx="2" fill="#6366F1"/>
+  <circle cx="908" cy="172" r="12" fill="#EEF2FF"/>
+  <use href="#icon-gear" x="896" y="160" width="24" height="24" color="#6366F1"/>
+  <text x="924" y="170" font-size="13" font-weight="600" fill="#1E293B">Composants</text>
+  <text x="899" y="192" font-size="10" font-weight="500" fill="#475569">Sidebar · Header · AppShell</text>
+  <text x="899" y="207" font-size="10" font-weight="500" fill="#475569">AlertsTable · AlertDetail</text>
+  <text x="899" y="222" font-size="10" font-weight="500" fill="#475569">FlowsTable · EventLog</text>
+  <text x="899" y="237" font-size="10" font-weight="500" fill="#475569">ScenarioGrid · SummaryCards</text>
+  <text x="899" y="252" font-size="10" font-weight="500" fill="#475569">IPBreakdownChart</text>
+  <text x="899" y="274" font-size="10" font-weight="400" fill="#9CA3AF">Recharts · Tailwind CSS</text>
+  <text x="899" y="289" font-size="10" font-weight="400" fill="#9CA3AF">SeverityBadge · LiveIndicator</text>
+
+  <!-- Contexts node -->
+  <rect x="667" y="325" width="200" height="80" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="667" y="325" width="4" height="80" rx="2" fill="#8B5CF6"/>
+  <circle cx="688" cy="357" r="12" fill="#F5F3FF"/>
+  <use href="#icon-lock" x="676" y="345" width="24" height="24" color="#8B5CF6"/>
+  <text x="705" y="353" font-size="13" font-weight="600" fill="#1E293B">Contextes</text>
+  <text x="679" y="372" font-size="10" font-weight="500" fill="#475569">LanguageContext (FR / EN)</text>
+  <text x="679" y="387" font-size="10" font-weight="500" fill="#475569">AuthProvider · session</text>
+
+  <!-- Hooks node -->
+  <rect x="887" y="325" width="200" height="80" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="887" y="325" width="4" height="80" rx="2" fill="#8B5CF6"/>
+  <circle cx="908" cy="357" r="12" fill="#F5F3FF"/>
+  <use href="#icon-zap" x="896" y="345" width="24" height="24" color="#8B5CF6"/>
+  <text x="924" y="353" font-size="13" font-weight="600" fill="#1E293B">Hooks</text>
+  <text x="899" y="372" font-size="10" font-weight="500" fill="#475569">useTranslation · useWebSocket</text>
+  <text x="899" y="387" font-size="10" font-weight="500" fill="#475569">useAiProvider · useAppSettings</text>
+
+  <!-- SWR + WebSocket node -->
+  <rect x="667" y="425" width="420" height="58" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="667" y="425" width="4" height="58" rx="2" fill="#06B6D4"/>
+  <circle cx="690" cy="454" r="14" fill="#ECFEFF"/>
+  <use href="#icon-zap" x="678" y="442" width="24" height="24" color="#06B6D4"/>
+  <text x="712" y="449" font-size="13" font-weight="600" fill="#1E293B">SWR Polling + WebSocket temps réel</text>
+  <text x="712" y="467" font-size="11" font-weight="400" fill="#64748B">Actualisation auto · Alertes en direct · refresh 10s</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  AI GROUP  (amber)                                     -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="647" y="556" width="460" height="216" rx="14" fill="#F59E0B1A" stroke="#F59E0B40" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <rect x="659" y="544" width="188" height="24" rx="12" fill="#F59E0B"/>
+  <text x="753" y="560" font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">Intelligence Artificielle</text>
+  <text x="877" y="586" font-size="10" font-weight="500" fill="#92400E" text-anchor="middle">Explication d'alertes · Assistant chat</text>
+
+  <!-- Ollama node -->
+  <rect x="667" y="598" width="200" height="108" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="667" y="598" width="4" height="108" rx="2" fill="#F59E0B"/>
+  <circle cx="688" cy="634" r="14" fill="#FFFBEB"/>
+  <use href="#icon-server" x="676" y="622" width="24" height="24" color="#F59E0B"/>
+  <text x="710" y="625" font-size="13" font-weight="600" fill="#1E293B">Ollama</text>
+  <text x="710" y="642" font-size="11" font-weight="400" fill="#64748B">LLM local (CPU / GPU)</text>
+  <text x="710" y="658" font-size="10" font-weight="400" fill="#9CA3AF">Aucune clé API requise</text>
+  <rect x="679" y="667" width="52" height="18" rx="9" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1"/>
+  <text x="705" y="679" font-size="10" font-weight="600" fill="#92400E" text-anchor="middle">Local</text>
+
+  <!-- Kimi / NIM node -->
+  <rect x="887" y="598" width="200" height="108" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <rect x="887" y="598" width="4" height="108" rx="2" fill="#F59E0B"/>
+  <circle cx="908" cy="634" r="14" fill="#FFFBEB"/>
+  <use href="#icon-cloud" x="896" y="622" width="24" height="24" color="#F59E0B"/>
+  <text x="930" y="625" font-size="13" font-weight="600" fill="#1E293B">Kimi via NVIDIA</text>
+  <text x="930" y="642" font-size="11" font-weight="400" fill="#64748B">LLM cloud (NIM)</text>
+  <text x="930" y="658" font-size="10" font-weight="400" fill="#9CA3AF">Clé API navigateur</text>
+  <rect x="899" y="667" width="52" height="18" rx="9" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1"/>
+  <text x="925" y="679" font-size="10" font-weight="600" fill="#92400E" text-anchor="middle">Cloud</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  USER NODE                                             -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="1167" y="255" width="155" height="70" rx="10" fill="#1E293B" filter="url(#shadow-md)"/>
+  <circle cx="1192" cy="290" r="14" fill="#6366F1"/>
+  <use href="#icon-user" x="1180" y="278" width="24" height="24" color="#FFFFFF"/>
+  <text x="1214" y="284" font-size="13" font-weight="600" fill="#FFFFFF">Utilisateur</text>
+  <text x="1214" y="301" font-size="11" font-weight="400" fill="#94A3B8">Navigateur web</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  LEGEND                                               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="1167" y="370" width="240" height="210" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="1179" y="392" font-size="10" font-weight="600" fill="#94A3B8" letter-spacing="0.8">LÉGENDE</text>
+  <!-- Group colors -->
+  <rect x="1179" y="402" width="14" height="14" rx="3" fill="#F43F5E1A" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="1200" y="413" font-size="11" fill="#1E293B">Surveillance réseau</text>
+  <rect x="1179" y="424" width="14" height="14" rx="3" fill="#10B9811A" stroke="#10B981" stroke-width="1.5"/>
+  <text x="1200" y="435" font-size="11" fill="#1E293B">Backend Python</text>
+  <rect x="1179" y="446" width="14" height="14" rx="3" fill="#6366F11A" stroke="#6366F1" stroke-width="1.5"/>
+  <text x="1200" y="457" font-size="11" fill="#1E293B">Frontend Next.js</text>
+  <rect x="1179" y="468" width="14" height="14" rx="3" fill="#F59E0B1A" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="1200" y="479" font-size="11" fill="#1E293B">Intelligence artificielle</text>
+  <!-- Arrow types -->
+  <line x1="1179" y1="502" x2="1207" y2="502" stroke="#F43F5E" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow-rose)"/>
+  <text x="1216" y="506" font-size="11" fill="#1E293B">Flux de données</text>
+  <line x1="1179" y1="522" x2="1207" y2="522" stroke="#6366F1" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow-indigo)"/>
+  <text x="1216" y="526" font-size="11" fill="#1E293B">REST API</text>
+  <line x1="1179" y1="542" x2="1207" y2="542" stroke="#06B6D4" stroke-width="2" stroke-dasharray="5,3" stroke-linecap="round" marker-end="url(#arrow-cyan)"/>
+  <text x="1216" y="546" font-size="11" fill="#1E293B">WebSocket</text>
+  <line x1="1179" y1="562" x2="1207" y2="562" stroke="#64748B" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow-slate)"/>
+  <text x="1216" y="566" font-size="11" fill="#1E293B">Interaction utilisateur</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  ARROWS                                                -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- 1: Traffic → Suricata (straight down) -->
+  <line x1="136" y1="215" x2="136" y2="275"
+        stroke="#F43F5E" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow-rose)"/>
+
+  <!-- 2: Suricata → EVE Log (straight down) -->
+  <line x1="136" y1="357" x2="136" y2="420"
+        stroke="#F43F5E" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow-rose)"/>
+
+  <!-- 3: EVE Log → EVE Watcher (right → up → right, L-shape with 2 corners) -->
+  <path d="M 227,452 L 247,452 Q 267,452 267,432 L 267,209 Q 267,189 287,189 L 307,189"
+        fill="none" stroke="#F43F5E" stroke-width="2" stroke-linecap="round"
+        marker-end="url(#arrow-rose)"/>
+  <!-- eve.json label along the arrow -->
+  <rect x="232" y="469" width="62" height="18" rx="9" fill="#FFF1F2"/>
+  <text x="263" y="481" font-size="10" font-weight="600" fill="#9F1239" text-anchor="middle">eve.json</text>
+
+  <!-- 4: EVE Watcher → FastAPI (straight down) -->
+  <line x1="442" y1="228" x2="442" y2="288"
+        stroke="#10B981" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow-emerald)"/>
+
+  <!-- 5: FastAPI → SQLite (straight down) -->
+  <line x1="442" y1="396" x2="442" y2="456"
+        stroke="#10B981" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow-emerald)"/>
+
+  <!-- 6: FastAPI REST → SWR+WS left edge (right → down → right, 2 corners) -->
+  <path d="M 577,330 L 617,330 Q 637,330 637,350 L 637,415 Q 637,435 657,435 L 667,435"
+        fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round"
+        marker-end="url(#arrow-indigo)"/>
+  <!-- REST label -->
+  <rect x="593" y="312" width="44" height="18" rx="9" fill="#EEF2FF"/>
+  <text x="615" y="324" font-size="10" font-weight="600" fill="#4338CA" text-anchor="middle">REST</text>
+
+  <!-- 7: FastAPI WebSocket → SWR+WS left edge (offset, dashed cyan) -->
+  <path d="M 577,358 L 612,358 Q 632,358 632,378 L 632,445 Q 632,465 652,465 L 667,465"
+        fill="none" stroke="#06B6D4" stroke-width="2" stroke-dasharray="5,3" stroke-linecap="round"
+        marker-end="url(#arrow-cyan)"/>
+  <!-- WS label -->
+  <rect x="593" y="360" width="36" height="18" rx="9" fill="#ECFEFF"/>
+  <text x="611" y="372" font-size="10" font-weight="600" fill="#0E7490" text-anchor="middle">WS</text>
+
+  <!-- 8: SWR+WS → Ollama (straight down) -->
+  <line x1="767" y1="483" x2="767" y2="598"
+        stroke="#F59E0B" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
+
+  <!-- 9: SWR+WS → Kimi (straight down) -->
+  <line x1="987" y1="483" x2="987" y2="598"
+        stroke="#F59E0B" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow-amber)"/>
+
+  <!-- AI label between SWR and AI nodes -->
+  <rect x="858" y="502" width="36" height="18" rx="9" fill="#FFFBEB"/>
+  <text x="876" y="514" font-size="10" font-weight="600" fill="#92400E" text-anchor="middle">IA</text>
+
+  <!-- 10: User → Components right edge (left → up → left, 2 corners) -->
+  <path d="M 1167,290 L 1147,290 Q 1127,290 1127,270 L 1127,252 Q 1127,232 1107,232 L 1087,232"
+        fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round"
+        marker-end="url(#arrow-slate)"/>
+
+</svg>

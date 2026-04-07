@@ -2,6 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useTranslation } from "@/hooks/useTranslation";
 import useSWR from "swr";
 import { fetchStatus, fetchHealth } from "@/lib/api";
 import type { SystemStatus } from "@/lib/types";
@@ -10,6 +11,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 export default function StatusPage() {
   const { status: wsStatus } = useWebSocket();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { data: sysStatus } = useSWR<SystemStatus>("status", fetchStatus, {
     refreshInterval: 5000,
   });
@@ -19,46 +21,42 @@ export default function StatusPage() {
 
   return (
     <div className="min-h-screen">
-      <Header title="System Status" wsStatus={wsStatus} />
+      <Header title={t("status.title")} wsStatus={wsStatus} />
       <div className="p-6 space-y-6">
         {/* Backend Health */}
         <div className="surface-2 border border-app rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Backend</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("status.backend")}</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-muted">Status</div>
+            <div className="text-muted">{t("status.backendStatus")}</div>
             <div>
               {health ? (
-                <span className="text-green-400">Online</span>
+                <span className="text-green-400">{t("status.online")}</span>
               ) : (
-                <span className="text-red-400">Offline</span>
+                <span className="text-red-400">{t("status.offline")}</span>
               )}
             </div>
-            <div className="text-muted">Version</div>
+            <div className="text-muted">{t("status.backendVersion")}</div>
             <div className="font-mono">{health?.version || "--"}</div>
           </div>
         </div>
 
         {/* Watcher Status */}
         <div className="surface-2 border border-app rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">EVE Watcher</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("status.watcher")}</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-muted">Running</div>
+            <div className="text-muted">{t("status.watcherRunning")}</div>
             <div>
               {sysStatus?.watcher.running ? (
-                <span className="text-green-400">Yes</span>
+                <span className="text-green-400">{t("status.yes")}</span>
               ) : (
-                <span className="text-red-400">No</span>
+                <span className="text-red-400">{t("status.no")}</span>
               )}
             </div>
-            <div className="text-muted">EVE Path</div>
-            <div className="font-mono text-xs">
-              {sysStatus?.watcher.eve_path || "--"}
-            </div>
-            <div className="text-muted">Lines Processed</div>
+            <div className="text-muted">{t("status.watcherLinesProcessed")}</div>
             <div className="font-mono">
               {sysStatus?.watcher.lines_processed?.toLocaleString() || "0"}
             </div>
-            <div className="text-muted">Last Event</div>
+            <div className="text-muted">{t("status.watcherLastEvent")}</div>
             <div className="font-mono text-xs">
               {sysStatus?.watcher.last_event_at || "--"}
             </div>
@@ -67,18 +65,18 @@ export default function StatusPage() {
 
         {/* WebSocket */}
         <div className="surface-2 border border-app rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">WebSocket</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("status.websocket")}</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-muted">Connection</div>
+            <div className="text-muted">{t("status.wsConnection")}</div>
             <div>
               {wsStatus === "connected" && (
-                <span className="text-green-400">Connected</span>
+                <span className="text-green-400">{t("status.wsConnected")}</span>
               )}
               {wsStatus === "connecting" && (
-                <span className="text-yellow-400">Connecting...</span>
+                <span className="text-yellow-400">{t("status.wsConnecting")}</span>
               )}
               {wsStatus === "disconnected" && (
-                <span className="text-red-400">Disconnected</span>
+                <span className="text-red-400">{t("status.wsDisconnected")}</span>
               )}
             </div>
           </div>
@@ -86,9 +84,9 @@ export default function StatusPage() {
 
         {/* Database */}
         <div className="surface-2 border border-app rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Database</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("status.database")}</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-muted">Status</div>
+            <div className="text-muted">{t("status.dbStatus")}</div>
             <div>
               <span className="text-green-400">
                 {sysStatus?.database.status || "--"}
@@ -98,38 +96,24 @@ export default function StatusPage() {
         </div>
 
         <div className="surface-2 border border-app rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Authentication</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("status.auth")}</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-muted">Current user</div>
+            <div className="text-muted">{t("status.authUser")}</div>
             <div className="font-mono">{user?.username || "--"}</div>
-            <div className="text-muted">Secure cookie</div>
+            <div className="text-muted">{t("status.authSecureCookie")}</div>
             <div>
               {sysStatus?.auth.secure_cookie ? (
-                <span className="text-green-400">Enabled</span>
+                <span className="text-green-400">{t("status.enabled")}</span>
               ) : (
-                <span className="text-red-400">Disabled</span>
+                <span className="text-red-400">{t("status.disabled")}</span>
               )}
             </div>
-            <div className="text-muted">Session TTL</div>
+            <div className="text-muted">{t("status.authSessionTtl")}</div>
             <div className="font-mono">
               {sysStatus?.auth.session_ttl_hours || "--"}h
             </div>
-            <div className="text-muted">Known users</div>
+            <div className="text-muted">{t("status.authUserCount")}</div>
             <div className="font-mono">{sysStatus?.auth.user_count || "--"}</div>
-          </div>
-        </div>
-
-        <div className="surface-2 border border-app rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Transport</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-muted">Recommended secure UI</div>
-            <div className="font-mono text-xs">
-              {sysStatus?.transport.secure_ui_origin || "--"}
-            </div>
-            <div className="text-muted">Browser protocol</div>
-            <div className="font-mono">
-              {typeof window !== "undefined" ? window.location.protocol : "--"}
-            </div>
           </div>
         </div>
       </div>

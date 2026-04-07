@@ -5,34 +5,37 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import NetworkSidebarPanel from "@/components/layout/NetworkSidebarPanel";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useTranslation } from "@/hooks/useTranslation";
+import type { TranslationKey } from "@/lib/i18n/translations";
 
 type NavItem = {
   href: string;
-  label: string;
+  labelKey: TranslationKey;
   icon: string;
   adminOnly?: boolean;
 };
 
 const primaryNavItems: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: "▦" },
-  { href: "/assistant", label: "Assistant", icon: "◉" },
+  { href: "/", labelKey: "nav.dashboard", icon: "▦" },
+  { href: "/assistant", labelKey: "nav.assistant", icon: "◉" },
 ];
 
 const postRequestsNavItems: NavItem[] = [
-  { href: "/security", label: "Security", icon: "⚔" },
+  { href: "/security", labelKey: "nav.security", icon: "⚔" },
 ];
 
 const alertsNavItems: NavItem[] = [
-  { href: "/alerts", label: "Alerts", icon: "⚠" },
-  { href: "/flows", label: "Flows", icon: "⇄" },
-  { href: "/events", label: "Events", icon: "☰" },
+  { href: "/alerts", labelKey: "nav.alerts", icon: "⚠" },
+  { href: "/flows", labelKey: "nav.flows", icon: "⇄" },
+  { href: "/events", labelKey: "nav.events", icon: "☰" },
 ];
 
-const secondaryNavItems: NavItem[] = [{ href: "/status", label: "Status", icon: "⏺" }];
+const secondaryNavItems: NavItem[] = [{ href: "/status", labelKey: "nav.status", icon: "⏺" }];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
 
@@ -82,7 +85,7 @@ export default function Sidebar() {
         <span className="text-base leading-none w-5 text-center sidebar-icon">
           {item.icon}
         </span>
-        <span className="sidebar-label">{item.label}</span>
+        <span className="sidebar-label">{t(item.labelKey)}</span>
         {active && (
           <span className="absolute right-3 h-1.5 w-1.5 rounded-full accent-dot" />
         )}
@@ -127,7 +130,7 @@ export default function Sidebar() {
           <span className="sidebar-icon w-5 text-center text-base leading-none">
             ⚠
           </span>
-          <span className="sidebar-label flex-1 text-left">Requests</span>
+          <span className="sidebar-label flex-1 text-left">{t("nav.surveillance")}</span>
           <span className="sidebar-label flex h-6 w-6 items-center justify-center">
             <svg
               viewBox="0 0 20 20"

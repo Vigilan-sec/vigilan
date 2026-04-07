@@ -1,43 +1,43 @@
+"use client";
+
 import { formatNumber } from "@/lib/utils";
 import type { AlertStats, FlowStats } from "@/lib/types";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface SummaryCardsProps {
   alertStats: AlertStats | undefined;
   flowStats: FlowStats | undefined;
 }
 
-interface CardData {
-  label: string;
-  value: string;
-  color: string;
-  subtext?: string;
-}
-
 export default function SummaryCards({ alertStats, flowStats }: SummaryCardsProps) {
-  const cards: CardData[] = [
+  const { t } = useTranslation();
+
+  const cards = [
     {
-      label: "Total Alerts",
+      label: t("dashboard.totalAlerts"),
       value: alertStats ? formatNumber(alertStats.total) : "--",
       color: "text-strong",
-      subtext: "All time",
+      subtext: t("common.allTime"),
     },
     {
-      label: "High Severity",
+      label: t("dashboard.highSeverity"),
       value: alertStats ? formatNumber(alertStats.by_severity["1"] ?? 0) : "--",
       color: "text-red-400",
-      subtext: "Severity 1",
+      subtext: t("dashboard.severity1"),
     },
     {
-      label: "Medium Severity",
+      label: t("dashboard.mediumSeverity"),
       value: alertStats ? formatNumber(alertStats.by_severity["2"] ?? 0) : "--",
       color: "text-yellow-400",
-      subtext: "Severity 2",
+      subtext: t("dashboard.severity2"),
     },
     {
-      label: "Active Flows",
+      label: t("dashboard.activeFlows"),
       value: flowStats ? formatNumber(flowStats.total) : "--",
       color: "text-blue-400",
-      subtext: flowStats ? `${formatNumber(flowStats.total_bytes)} bytes total` : undefined,
+      subtext: flowStats
+        ? t("dashboard.bytesTotal", { bytes: formatNumber(flowStats.total_bytes) })
+        : undefined,
     },
   ];
 

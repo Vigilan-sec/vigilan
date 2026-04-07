@@ -2,6 +2,7 @@
 
 import type { SecurityOverview } from "@/lib/types";
 import { formatNumber, formatTimestamp } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface RecentSecurityHitsProps {
   overview: SecurityOverview | undefined;
@@ -10,13 +11,15 @@ interface RecentSecurityHitsProps {
 export default function RecentSecurityHits({
   overview,
 }: RecentSecurityHitsProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="rounded-lg border border-app surface-2 p-5">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-strong">Recent scenario hits</h2>
+          <h2 className="text-sm font-semibold text-strong">{t("security.recentHitsTitle")}</h2>
           <p className="mt-1 text-xs text-subtle">
-            Latest alerts from the tracked attack playbooks.
+            {t("security.recentHitsDesc")}
           </p>
         </div>
       </div>
@@ -26,17 +29,17 @@ export default function RecentSecurityHits({
           <table className="w-full text-sm">
             <thead className="surface-3 text-xs uppercase text-muted">
               <tr>
-                <th className="px-4 py-2.5 text-left font-medium">Time</th>
-                <th className="px-4 py-2.5 text-left font-medium">Signature</th>
-                <th className="px-4 py-2.5 text-left font-medium">Path</th>
-                <th className="px-4 py-2.5 text-left font-medium">Action</th>
+                <th className="px-4 py-2.5 text-left font-medium">{t("security.colTime")}</th>
+                <th className="px-4 py-2.5 text-left font-medium">{t("security.colSignature")}</th>
+                <th className="px-4 py-2.5 text-left font-medium">{t("security.colPath")}</th>
+                <th className="px-4 py-2.5 text-left font-medium">{t("security.colAction")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[color:var(--border)]">
               {!overview || overview.recent_hits.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-6 text-center text-subtle">
-                    No tracked scenario hits yet.
+                    {t("security.noHits")}
                   </td>
                 </tr>
               ) : (
@@ -58,7 +61,7 @@ export default function RecentSecurityHits({
                             : "status-badge-success"
                         }`}
                       >
-                        {hit.action}
+                        {hit.action === "blocked" ? t("action.blocked") : t("action.allowed")}
                       </span>
                     </td>
                   </tr>
@@ -71,7 +74,7 @@ export default function RecentSecurityHits({
         <div className="space-y-4">
           <div className="rounded-lg border border-app surface-1 p-4">
             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-subtle">
-              Tactic focus
+              {t("security.tacticFocus")}
             </h3>
             <div className="mt-3 space-y-3">
               {overview?.tactic_breakdown.length ? (
@@ -87,24 +90,21 @@ export default function RecentSecurityHits({
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-sky-500/70 to-blue-500/70"
                         style={{
-                          width: `${Math.min(
-                            100,
-                            item.count * 10,
-                          )}%`,
+                          width: `${Math.min(100, item.count * 10)}%`,
                         }}
                       />
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-subtle">No tactic data yet.</p>
+                <p className="text-xs text-subtle">{t("security.noTacticData")}</p>
               )}
             </div>
           </div>
 
           <div className="rounded-lg border border-app surface-1 p-4">
             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-subtle">
-              Top attack sources
+              {t("security.topSources")}
             </h3>
             <div className="mt-3 space-y-2">
               {overview?.top_sources.length ? (
@@ -115,12 +115,12 @@ export default function RecentSecurityHits({
                   >
                     <span className="font-mono text-xs text-muted">{source.ip}</span>
                     <span className="text-xs text-subtle">
-                      {formatNumber(source.count)} hits
+                      {t("security.hits", { count: formatNumber(source.count) })}
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-subtle">No source data yet.</p>
+                <p className="text-xs text-subtle">{t("security.noSourceData")}</p>
               )}
             </div>
           </div>

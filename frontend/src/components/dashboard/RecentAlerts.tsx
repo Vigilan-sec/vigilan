@@ -4,33 +4,35 @@ import Link from "next/link";
 import type { AlertRecord } from "@/lib/types";
 import { formatTimestamp } from "@/lib/utils";
 import SeverityBadge from "@/components/alerts/SeverityBadge";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface RecentAlertsProps {
   alerts: AlertRecord[];
 }
 
 export default function RecentAlerts({ alerts }: RecentAlertsProps) {
+  const { t } = useTranslation();
   const recent = alerts.slice(0, 10);
 
   return (
     <div className="rounded-lg border border-app surface-2">
       <div className="flex items-center justify-between border-b border-app px-5 py-3">
-        <h2 className="text-sm font-semibold text-strong">Recent Alerts</h2>
+        <h2 className="text-sm font-semibold text-strong">{t("dashboard.recentAlerts")}</h2>
         <Link
           href="/alerts"
           className="text-xs text-muted hover:text-strong transition-colors"
         >
-          View all &rarr;
+          {t("common.viewAll")}
         </Link>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="surface-3 text-xs uppercase text-muted">
             <tr>
-              <th className="px-4 py-2.5 text-left font-medium">Time</th>
-              <th className="px-4 py-2.5 text-left font-medium">Severity</th>
-              <th className="px-4 py-2.5 text-left font-medium">Signature</th>
-              <th className="px-4 py-2.5 text-left font-medium">Source &rarr; Dest</th>
+              <th className="px-4 py-2.5 text-left font-medium">{t("dashboard.time")}</th>
+              <th className="px-4 py-2.5 text-left font-medium">{t("dashboard.severity")}</th>
+              <th className="px-4 py-2.5 text-left font-medium">{t("dashboard.signature")}</th>
+              <th className="px-4 py-2.5 text-left font-medium">{t("dashboard.sourceDestination")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[color:var(--border)]">
@@ -40,7 +42,7 @@ export default function RecentAlerts({ alerts }: RecentAlertsProps) {
                   colSpan={4}
                   className="px-4 py-6 text-center text-subtle text-sm"
                 >
-                  No alerts yet
+                  {t("dashboard.noAlerts")}
                 </td>
               </tr>
             ) : (
