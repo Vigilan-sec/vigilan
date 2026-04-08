@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     # LLM / RAG
     llm_provider_default: Literal["ollama", "nim"] = "ollama"
     ollama_host: str = "http://localhost:11434"
-    ollama_model: str = "llama3.2:3b"
+    ollama_model: str = "gemma4:e4b"
     embedding_model: str = "mxbai-embed-large"
     nim_base_url: str = "https://integrate.api.nvidia.com/v1"
     nim_model: str = "moonshotai/kimi-k2-instruct"
